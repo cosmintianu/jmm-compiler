@@ -4,15 +4,22 @@ grammar Javamm;
     package pt.up.fe.comp2025;
 }
 
+// ###############################################
+// essa parte é para reservar o nome das variáveis
+// ###############################################
 CLASS : 'class' ;
 INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 
 INTEGER : [0-9] ;
+BOOLEAN : 'boolean' ;
 ID : [a-zA-Z]+ ;
 
 WS : [ \t\n\r\f]+ -> skip ;
+
+// ###############################################
+// ###############################################
 
 program
     : classDecl EOF
@@ -31,7 +38,12 @@ varDecl
     ;
 
 type
-    : name= INT ;
+    : name= INT
+    | name= INT '[' ']'
+    | name= INT '...'
+    | name= BOOLEAN
+    | name= ID
+    ;
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
