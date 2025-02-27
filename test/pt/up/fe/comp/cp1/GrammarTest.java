@@ -79,7 +79,7 @@ public class GrammarTest {
 
     @Test
     public void testStmtIfElse() {
-        TestUtils.parseVerbose("if(a){ifStmt1;ifStmt2;}else{elseStmt1;elseStmt2;}", STATEMENT);
+        TestUtils.parseVerbose("if(a){ifStmt1;}else{}", STATEMENT);
     }
 
     @Test

@@ -13,9 +13,9 @@ PUBLIC : 'public' ;
 RETURN : 'return' ;
 EXTENDS : 'extends' ;
 
-INTEGER : [0-9] ;
+INTEGER : [1-9]*[0-9] ;
 BOOLEAN : 'boolean' ;
-ID : [a-zA-Z]+ ;
+ID : [a-zA-Z_][a-zA-Z0-9_]* ; //Alterei para aceitar numeros e o caractere _
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -23,17 +23,16 @@ WS : [ \t\n\r\f]+ -> skip ;
 // ###############################################
 
 program
-    : importDeclaration* classDecl EOF
+    : importDecl* classDecl EOF
     ;
 
-importDeclaration
+importDecl
     : 'import' name=ID ('.' name=ID)* ';'
     ;
 
 classDecl locals[boolean extendsClass=false]
     : CLASS name=ID
-        (EXTENDS {$extendsClass=true;})?
-            name=ID
+        (EXTENDS name=ID {$extendsClass=true;})? //Aqui o ID só é pedido quando EXTENDS for verdadeiro
         '{'
         varDecl*
         methodDecl*
@@ -55,11 +54,11 @@ type
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
-        '(' param ')'
-        '{' varDecl* stmt* '}' //me parece que falta a parte do return expression
+            '(' param (',' param)* ')'
+        '{' varDecl* stmt* '}'
 
     | (PUBLIC {$isPublic=true;})?
-        'static' 'void ' 'main' '(' 'String' '[' ']' name=ID ')'
+        'static' 'void ' 'main' '(' name=ID '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
 
@@ -83,19 +82,19 @@ expr
     : expr op= '*' expr #BinaryExpr //
     | expr op= '+' expr #BinaryExpr //
 
-    | value=INTEGER (value=INTEGER)? #IntegerLiteral // Pensei em add o (value=INTEGER)* para suportar varios digitos
+    | value=INTEGER #IntegerLiteral
     | name=ID #VarRefExpr //
     | expr ('&&' | '<' | '+' | '-' | '*' | '/' ) expr #Tobedefined
     | expr '[' expr ']' #Tobedefined
     | expr '.' 'length' #Tobedefined
-    | 'new' 'int' '[' expr ']' #Tobedefined //será que aqui o int é mesmo entre parentesis?
+    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #Tobedefined
+    | 'new' 'int' '[' expr ']' #Tobedefined
     | 'new' name=ID '(' ')' #Tobedefined
     | '!' expr #Tobedefined
     | '(' expr ')' #Tobedefined
     | 'true' #Tobedefined
     | 'false' #Tobedefined
     | 'this' #Tobedefined
-    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #Tobedefined
     | '[' ( expr ( ',' expr )* )? ']' #Tobedefined
     ;
 
