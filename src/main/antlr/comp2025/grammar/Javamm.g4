@@ -4,9 +4,9 @@ grammar Javamm;
     package pt.up.fe.comp2025;
 }
 
-// ###############################################
-// essa parte é para reservar o nome das variáveis
-// ###############################################
+/* ###############################################
+   This part is to reserve the name of the variables
+   ############################################### */
 CLASS : 'class' ;
 INT : 'int' ;
 PUBLIC : 'public' ;
@@ -15,12 +15,12 @@ EXTENDS : 'extends' ;
 
 INTEGER : [1-9]*[0-9] ;
 BOOLEAN : 'boolean' ;
-ID : [a-zA-Z_][a-zA-Z0-9_]* ; //Alterei para aceitar numeros e o caractere _
+ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
-// ###############################################
-// ###############################################
+/* ###############################################
+ ############################################### */
 
 program
     : importDecl* classDecl EOF
@@ -32,7 +32,7 @@ importDecl
 
 classDecl locals[boolean extendsClass=false]
     : CLASS name=ID
-        (EXTENDS name=ID {$extendsClass=true;})? //Aqui o ID só é pedido quando EXTENDS for verdadeiro
+        (EXTENDS name=ID {$extendsClass=true;})?
         '{'
         varDecl*
         methodDecl*
@@ -68,33 +68,31 @@ param
 
 stmt
     : expr '=' expr ';' #AssignStmt //
-    | RETURN expr ';' #ReturnStmt
-
-    | '{' stmt* '}' #To_be_defined
-    | 'if' '(' expr ')' stmt 'else' stmt #To_be_defined
-    | 'while' '(' expr ')' stmt #To_be_defined
-    | expr ';' #To_be_defined
-    | name=ID '=' expr ';' #To_be_defined
-    | name=ID '[' expr ']' '=' expr ';' #To_be_defined
+    | RETURN expr ';' #ReturnStmt //
+    | '{' stmt* '}' #BracketStmt
+    | 'if' '(' expr ')' stmt 'else' stmt #IfStmt
+    | 'while' '(' expr ')' stmt #WhileStmt
+    | expr ';' #ExprStmt
+    | name=ID '=' expr ';' #VarAssignStmt
+    | name=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     ;
 
 expr
     : expr op= '*' expr #BinaryExpr //
     | expr op= '+' expr #BinaryExpr //
-
+    | expr ('&&' | '<' | '+' | '-' | '*' | '/' ) expr #BinaryExpr
+    | expr '[' expr ']' #ArrayAccessExpr
+    | expr '.' 'length' #LengthExpr
+    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
+    | 'new' 'int' '[' expr ']' #NewArrayExpr
+    | 'new' name=ID '(' ')' #NewObjectExpr
+    | '!' expr #UnaryExpr
+    | '(' expr ')' #ParenExpr
+    | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | value=INTEGER #IntegerLiteral
+    | 'true' #BooleanLiteral
+    | 'false' #BooleanLiteral
     | name=ID #VarRefExpr //
-    | expr ('&&' | '<' | '+' | '-' | '*' | '/' ) expr #Tobedefined
-    | expr '[' expr ']' #Tobedefined
-    | expr '.' 'length' #Tobedefined
-    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #Tobedefined
-    | 'new' 'int' '[' expr ']' #Tobedefined
-    | 'new' name=ID '(' ')' #Tobedefined
-    | '!' expr #Tobedefined
-    | '(' expr ')' #Tobedefined
-    | 'true' #Tobedefined
-    | 'false' #Tobedefined
-    | 'this' #Tobedefined
-    | '[' ( expr ( ',' expr )* )? ']' #Tobedefined
+    | 'this' #ThisExpr
     ;
 
