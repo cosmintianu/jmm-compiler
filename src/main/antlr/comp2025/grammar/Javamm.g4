@@ -13,7 +13,20 @@ PUBLIC : 'public' ;
 RETURN : 'return' ;
 EXTENDS : 'extends' ;
 
-INTEGER : [1-9]*[0-9] ;
+STATIC : 'static';
+VOID :'void';
+MAIN : 'main';
+IF: 'if';
+ELSE: 'else';
+WHILE: 'while';
+NEW : 'new';
+LENGTH : 'length';
+TRUE: 'true';
+FALSE: 'false';
+THIS: 'this';
+IMPORT: 'import';
+
+INTEGER : [1-9][0-9]*|[0];
 BOOLEAN : 'boolean' ;
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
@@ -27,7 +40,7 @@ program
     ;
 
 importDecl
-    : 'import' name=ID ('.' name=ID)* ';'
+    : IMPORT name=ID ('.' name=ID)* ';'
     ;
 
 classDecl locals[boolean extendsClass=false]
@@ -58,7 +71,7 @@ methodDecl locals[boolean isPublic=false]
         '{' varDecl* stmt* '}'
 
     | (PUBLIC {$isPublic=true;})?
-        'static' 'void ' 'main' '(' name=ID '[' ']' name=ID ')'
+         STATIC VOID MAIN '(' name=ID '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
 
@@ -70,29 +83,27 @@ stmt
     : expr '=' expr ';' #AssignStmt //
     | RETURN expr ';' #ReturnStmt //
     | '{' stmt* '}' #BracketStmt
-    | 'if' '(' expr ')' stmt 'else' stmt #IfStmt
-    | 'while' '(' expr ')' stmt #WhileStmt
+    | IF '(' expr ')' stmt ELSE stmt #IfStmt
+    | WHILE '(' expr ')' stmt #WhileStmt
     | expr ';' #ExprStmt
     | name=ID '=' expr ';' #VarAssignStmt
     | name=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     ;
 
 expr
-    : expr op= '*' expr #BinaryExpr //
-    | expr op= '+' expr #BinaryExpr //
-    | expr ('&&' | '<' | '+' | '-' | '*' | '/' ) expr #BinaryExpr
+    : expr op=('&&' | '<' | '+' | '-' | '*' | '/' ) expr #BinaryExpr
     | expr '[' expr ']' #ArrayAccessExpr
-    | expr '.' 'length' #LengthExpr
+    | expr '.' LENGTH #LengthExpr
     | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
-    | 'new' 'int' '[' expr ']' #NewArrayExpr
-    | 'new' name=ID '(' ')' #NewObjectExpr
+    | NEW INT '[' expr ']' #NewArrayExpr
+    | NEW name=ID '(' ')' #NewObjectExpr
     | '!' expr #UnaryExpr
     | '(' expr ')' #ParenExpr
     | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | value=INTEGER #IntegerLiteral
-    | 'true' #BooleanLiteral
-    | 'false' #BooleanLiteral
+    | TRUE #BooleanLiteral
+    | FALSE #BooleanLiteral
     | name=ID #VarRefExpr //
-    | 'this' #ThisExpr
+    | THIS #ThisExpr
     ;
 
