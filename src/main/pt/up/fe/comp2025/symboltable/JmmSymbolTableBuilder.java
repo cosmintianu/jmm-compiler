@@ -38,7 +38,7 @@ public class JmmSymbolTableBuilder {
         var classDecl = classDecls.get(0);
 
         String className = classDecl.get("name");
-        String superClassName = classDecl.hasAttribute("extendedClass") ? classDecl.get("extendedClass") : null;
+        String superClassName = classDecl.getOptional("nameExtendClass").orElse(null);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
