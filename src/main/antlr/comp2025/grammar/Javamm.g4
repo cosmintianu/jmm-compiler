@@ -52,6 +52,7 @@ classDecl locals[boolean extendsClass=false]
         '}'
     ;
 
+
 varDecl
     : type name=ID ';'
     ;

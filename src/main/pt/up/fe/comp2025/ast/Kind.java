@@ -17,6 +17,7 @@ public enum Kind {
     PROGRAM,
     CLASS_DECL,
     VAR_DECL,
+    ImportDecl,
     TYPE,
     METHOD_DECL,
     PARAM,
