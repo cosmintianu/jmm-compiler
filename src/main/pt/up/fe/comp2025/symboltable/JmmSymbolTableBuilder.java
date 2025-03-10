@@ -7,15 +7,11 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-import static pt.up.fe.comp2025.ast.Kind.*;
+import static pt.up.fe.comp2025.ast.Kind.CLASS_DECL;
+import static pt.up.fe.comp2025.ast.Kind.VAR_DECL;
 
 public class JmmSymbolTableBuilder {
 
@@ -34,13 +30,13 @@ public class JmmSymbolTableBuilder {
                 message,
                 null);
     }
-    
+
     public JmmSymbolTable build(JmmNode root) {
         reports = new ArrayList<>();
 
         List<JmmNode> classDecls = root.getChildren(CLASS_DECL);
         var classDecl = classDecls.get(0);
-    
+
         String className = classDecl.get("name");
         String superClassName = classDecl.hasAttribute("extendedClass") ? classDecl.get("extendedClass") : null;
         var methods = buildMethods(classDecl);
@@ -49,13 +45,13 @@ public class JmmSymbolTableBuilder {
         var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
         var imports = buildImports(root);
-    
+
         return new JmmSymbolTable(className, superClassName, methods, returnTypes, params, locals, imports, fields);
     }
 
     private static List<String> buildImports(JmmNode root) {
         List<String> imports = new ArrayList<>();
-    
+
         for (JmmNode child : root.getChildren()) {
             if (child.getKind().equals("ImportDecl")) {
                 StringBuilder importPath = new StringBuilder();
@@ -68,38 +64,40 @@ public class JmmSymbolTableBuilder {
                 imports.add(importPath.toString());
             }
         }
-    
+
         return imports;
     }
 
     private List<Symbol> buildFields(JmmNode classDecl) {
         List<Symbol> Locals = new ArrayList<>();
-            classDecl.getChildren(VAR_DECL).stream().forEach(varDecl -> {
+        classDecl.getChildren(VAR_DECL).stream().forEach(varDecl -> {
             boolean isArray = Objects.equals(varDecl.getChild(0).getKind(), "VarArray");
-            Type type = new Type(varDecl.getChild(0).get("name"),isArray);
+            Type type = new Type(varDecl.getChild(0).get("name"), isArray);
             String name = varDecl.get("name");
-            Locals.add(new Symbol(type,name));
-        }  );
+            Locals.add(new Symbol(type, name));
+        });
 
         return Locals;
     }
 
     private Map<String, Type> buildReturnTypes(JmmNode classDecl) {
         Map<String, Type> map = new HashMap<>();
-    
+
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
             var name = method.get("name");
+            if (!method.getChildren().isEmpty()) {
             var returnTypeNode = method.getChildren().get(0);
             var returnType = TypeUtils.convertType(returnTypeNode);
             map.put(name, returnType);
+            }
         }
-    
+
         return map;
     }
 
     private Map<String, List<Symbol>> buildParams(JmmNode classDecl) {
         Map<String, List<Symbol>> map = new HashMap<>();
-    
+
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
             var name = method.get("name");
             var params = method.getChildren(Kind.PARAM).stream()
@@ -109,16 +107,16 @@ public class JmmSymbolTableBuilder {
                         return new Symbol(type, param.get("name"));
                     })
                     .toList();
-    
+
             map.put(name, params);
         }
-    
+
         return map;
     }
 
     private Map<String, List<Symbol>> buildLocals(JmmNode classDecl) {
         var map = new HashMap<String, List<Symbol>>();
-    
+
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
             var name = method.get("name");
             var locals = method.getChildren(Kind.VAR_DECL).stream()
@@ -128,10 +126,10 @@ public class JmmSymbolTableBuilder {
                         return new Symbol(type, varDecl.get("name"));
                     })
                     .toList();
-    
+
             map.put(name, locals);
         }
-    
+
         return map;
     }
 
