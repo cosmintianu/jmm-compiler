@@ -18,15 +18,12 @@ public class CompatibleOperandsBinaryExpr extends AnalysisVisitor {
         JmmNode leftOperand = binaryExpr.getChild(0);
         JmmNode rightOperand = binaryExpr.getChild(1);
 
+        // Get operand types
         String leftType = leftOperand.getKind();
         String rightType = rightOperand.getKind();
 
-        System.out.println("Left operand type: " + leftType);
-        System.out.println("Right operand type: " + rightType);
-        System.out.println("Number of children: " + binaryExpr.getChildren().size());
-
-        System.out.println(binaryExpr);
-
+        // Check if the first is an int
+        // and second matches the first
         if (leftType.equals(Kind.INTEGER_LITERAL.toString()) &&
                 leftType.equals(rightType)) {
             return null;
