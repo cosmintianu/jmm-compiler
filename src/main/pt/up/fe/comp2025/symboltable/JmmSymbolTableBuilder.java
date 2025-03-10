@@ -42,7 +42,7 @@ public class JmmSymbolTableBuilder {
         var classDecl = classDecls.get(0);
     
         String className = classDecl.get("name");
-        String superClassName = classDecl.hasAttribute("extendedClass") ? classDecl.get("extendedClass") : null;
+        String superClassName = classDecl.getOptional("nameExtendClass").orElse(null);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
@@ -89,7 +89,7 @@ public class JmmSymbolTableBuilder {
     
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
             var name = method.get("name");
-            var returnTypeNode = method.getChildren().get(0);
+            var returnTypeNode = method.getObject("returnType",JmmNode.class);
             var returnType = TypeUtils.convertType(returnTypeNode);
             map.put(name, returnType);
         }

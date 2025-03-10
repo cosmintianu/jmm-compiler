@@ -43,9 +43,9 @@ importDecl
     : IMPORT name=ID ('.' name=ID)* ';'
     ;
 
-classDecl locals[boolean extendsClass=false]
+classDecl
     : CLASS name=ID
-        (EXTENDS name=ID {$extendsClass=true;})?
+        (EXTENDS nameExtendClass=ID)?
         '{'
         varDecl*
         methodDecl*
@@ -67,7 +67,7 @@ type
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        type name=ID
+        returnType=type name=ID
             '(' param (',' param)* ')'
         '{' varDecl* stmt* '}'
 
