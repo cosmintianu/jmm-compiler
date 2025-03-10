@@ -31,6 +31,7 @@ BOOLEAN : 'boolean' ;
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
+LINE_COMMENT: '//' ~[\r\n]* -> skip;
 
 /* ###############################################
  ############################################### */
@@ -67,13 +68,19 @@ type
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        returnType=type name=ID
+        returnType name=ID
             '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
 
     | (PUBLIC {$isPublic=true;})?
          STATIC VOID MAIN '(' name=ID '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
+    ;
+
+returnType
+    : name= INT
+    | name= BOOLEAN
+    | name= ID
     ;
 
 param
