@@ -27,7 +27,8 @@ public enum Kind {
     EXPR,
     BINARY_EXPR,
     INTEGER_LITERAL,
-    VAR_REF_EXPR;
+    VAR_REF_EXPR,
+    ARRAY_ACCESS_EXPR;
 
 
     private final String name;
