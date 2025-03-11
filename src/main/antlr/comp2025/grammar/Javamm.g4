@@ -66,16 +66,23 @@ type
     | name= ID
     ;
 
-methodDecl locals[boolean isPublic=false]
+methodDecl locals[boolean isMain=false, boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        type name=ID
+        type nameMethod=ID
             '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
 
-    | (PUBLIC {$isPublic=true;})?
-         STATIC VOID MAIN '(' name=ID '[' ']' name=ID ')'
+    | {$isMain=true;} (PUBLIC {$isPublic=true;})?
+         STATIC VOID nameMethod=MAIN '(' 'String' '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
+
+returnType
+    : name= INT
+    | name= BOOLEAN
+    | name= ID
+    ;
+
 
 param
     : type name=ID

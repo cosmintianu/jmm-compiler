@@ -77,6 +77,7 @@ public class SymbolTableTest {
     public void Methods() {
         var semantics = test("symboltable/MethodsAndFields.jmm", false);
         var st = semantics.getSymbolTable();
+        System.out.println(st.print());
         var methods = st.getMethods();
         assertEquals(5, methods.size());
         var checkInt = 0;

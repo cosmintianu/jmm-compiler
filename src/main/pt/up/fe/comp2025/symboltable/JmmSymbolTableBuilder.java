@@ -2,6 +2,7 @@ package pt.up.fe.comp2025.symboltable;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.ast.AJmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -84,11 +85,19 @@ public class JmmSymbolTableBuilder {
         Map<String, Type> map = new HashMap<>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("name");
+            var name = method.get("nameMethod");
             if (!method.getChildren().isEmpty()) {
-            var returnTypeNode = method.getChildren().get(0);
-            var returnType = TypeUtils.convertType(returnTypeNode);
-            map.put(name, returnType);
+                if (method.getBoolean("isMain", false)) {
+                    var returnTypeNode = method.getChildren().get(0);
+                    var returnType = TypeUtils.convertType(returnTypeNode);
+                    map.put(name, returnType);
+
+                } else {
+                    var returnTypeNode = method.getChildren().get(0);
+                    var returnType = TypeUtils.convertType(returnTypeNode);
+                    map.put(name, returnType);
+
+                }
             }
         }
 
@@ -99,7 +108,7 @@ public class JmmSymbolTableBuilder {
         Map<String, List<Symbol>> map = new HashMap<>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("name");
+            var name = method.get("nameMethod");
             var params = method.getChildren(Kind.PARAM).stream()
                     .map(param -> {
                         var typeNode = param.getChildren().get(0);
@@ -118,7 +127,7 @@ public class JmmSymbolTableBuilder {
         var map = new HashMap<String, List<Symbol>>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("name");
+            var name = method.get("nameMethod");
             var locals = method.getChildren(Kind.VAR_DECL).stream()
                     .map(varDecl -> {
                         var typeNode = varDecl.getChildren().get(0);
@@ -135,7 +144,7 @@ public class JmmSymbolTableBuilder {
 
     private List<String> buildMethods(JmmNode classDecl) {
         return classDecl.getChildren(Kind.METHOD_DECL).stream()
-                .map(method -> method.get("name"))
+                .map(method -> method.get("nameMethod"))
                 .toList();
     }
 }

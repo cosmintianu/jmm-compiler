@@ -29,7 +29,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
      * @return
      */
     private List<AnalysisVisitor> buildPasses(SymbolTable table) {
-        return List.of(new UndeclaredVariable(),
+        return List.of(
+                //new UndeclaredVariable(),
                 new CompatibleOperandsBinaryExpr(),
                 new ArrayAccesOnInt());
     }
@@ -40,7 +41,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         var symbolTableBuilder = new JmmSymbolTableBuilder();
         SymbolTable table = symbolTableBuilder.build(rootNode);
-
+table.print();
         List<Report> reports = symbolTableBuilder.getReports();
 
         return new JmmSemanticsResult(parserResult, table, reports);
