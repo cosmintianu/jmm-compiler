@@ -59,11 +59,11 @@ varDecl
     ;
 
 type
-    : name= INT
-    | name= INT '[' ']'
-    | name= INT '...'
-    | name= BOOLEAN
-    | name= ID
+    : name= INT  #IntType
+    | name= INT '[' ']' #ArrayType
+    | name= INT '...'  #VarargsType
+    | name= BOOLEAN   #BooleanType
+    | name= ID    #IdType
     ;
 
 methodDecl locals[boolean isMain=false, boolean isPublic=false]
@@ -73,7 +73,7 @@ methodDecl locals[boolean isMain=false, boolean isPublic=false]
         '{' varDecl* stmt* '}'
 
     | {$isMain=true;} (PUBLIC {$isPublic=true;})?
-         STATIC VOID nameMethod=MAIN '(' 'String' '[' ']' name=ID ')'
+         STATIC VOID nameMethod=MAIN '(' name=ID '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
 

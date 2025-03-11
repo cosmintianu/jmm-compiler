@@ -22,8 +22,6 @@ public class TypeUtils {
     }
 
     public static Type convertType(JmmNode typeNode) {
-
-        // TODO: When you support new types, this must be updated
         var name = typeNode.get("name");
         var isArray = typeNode.getKind().equals("ArrayType");
         return new Type(name, isArray);

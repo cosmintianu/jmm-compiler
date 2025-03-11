@@ -19,7 +19,7 @@ public class ArrayAccesOnInt extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("name");
+        currentMethod = method.get("nameMethod");
         return null;
     }
 

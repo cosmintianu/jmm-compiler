@@ -11,8 +11,7 @@ import pt.up.fe.comp2025.ast.TypeUtils;
 
 import java.util.*;
 
-import static pt.up.fe.comp2025.ast.Kind.CLASS_DECL;
-import static pt.up.fe.comp2025.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2025.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
@@ -86,17 +85,16 @@ public class JmmSymbolTableBuilder {
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
             var name = method.get("nameMethod");
-            if (!method.getChildren().isEmpty()) {
-                if (method.getBoolean("isMain", false)) {
-                    var returnTypeNode = method.getChildren().get(0);
+            boolean isMain = method.getBoolean("isMain", false);
+
+            if (isMain) {
+                var returnType = new Type("void", false);
+                map.put(name, returnType);
+            } else {
+                if (!method.getChildren().isEmpty()) {
+                    var returnTypeNode = method.getChildren().getFirst();
                     var returnType = TypeUtils.convertType(returnTypeNode);
                     map.put(name, returnType);
-
-                } else {
-                    var returnTypeNode = method.getChildren().get(0);
-                    var returnType = TypeUtils.convertType(returnTypeNode);
-                    map.put(name, returnType);
-
                 }
             }
         }
