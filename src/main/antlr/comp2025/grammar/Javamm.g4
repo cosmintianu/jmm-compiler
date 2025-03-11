@@ -68,19 +68,13 @@ type
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        returnType name=ID
+        type name=ID
             '(' (param (',' param)*)? ')'
         '{' varDecl* stmt* '}'
 
     | (PUBLIC {$isPublic=true;})?
          STATIC VOID MAIN '(' name=ID '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
-    ;
-
-returnType
-    : name= INT
-    | name= BOOLEAN
-    | name= ID
     ;
 
 param
