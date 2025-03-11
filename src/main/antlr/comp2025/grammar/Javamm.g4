@@ -41,7 +41,7 @@ program
     ;
 
 importDecl
-    : IMPORT name=ID ('.' name=ID)* ';'
+    : IMPORT nameImport=ID ('.' name=ID)* ';'
     ;
 
 classDecl

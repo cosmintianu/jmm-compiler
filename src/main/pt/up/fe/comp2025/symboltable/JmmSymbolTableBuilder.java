@@ -46,7 +46,11 @@ public class JmmSymbolTableBuilder {
         var fields = buildFields(classDecl);
         var imports = buildImports(root);
 
-        return new JmmSymbolTable(className, superClassName, methods, returnTypes, params, locals, imports, fields);
+        JmmSymbolTable table = new JmmSymbolTable(className, superClassName, methods, returnTypes, params, locals, imports, fields);
+
+        System.out.println("Symbol Table generated: \n" + table);
+
+        return table;
     }
 
     private static List<String> buildImports(JmmNode root) {
@@ -54,13 +58,15 @@ public class JmmSymbolTableBuilder {
 
         for (JmmNode child : root.getChildren()) {
             if (child.getKind().equals("ImportDecl")) {
+
                 StringBuilder importPath = new StringBuilder();
-                for (JmmNode part : child.getChildren()) {
-                    if (importPath.length() > 0) {
-                        importPath.append(".");
-                    }
-                    importPath.append(part.get("name"));
+
+                importPath.append(child.get("nameImport"));
+
+                for (JmmNode part : child.getChildren("ID")) {
+                    importPath.append(".").append(part.get("name"));
                 }
+
                 imports.add(importPath.toString());
             }
         }
