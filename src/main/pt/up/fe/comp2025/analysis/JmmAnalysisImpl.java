@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.analysis.passes.ArrayAccesOnInt;
+import pt.up.fe.comp2025.analysis.passes.ArrayIndexNotIntPass;
 import pt.up.fe.comp2025.analysis.passes.CompatibleOperandsBinaryExpr;
 import pt.up.fe.comp2025.analysis.passes.UndeclaredVariable;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTableBuilder;
@@ -30,9 +31,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
      */
     private List<AnalysisVisitor> buildPasses(SymbolTable table) {
         return List.of(
-                //new UndeclaredVariable(),
+                new UndeclaredVariable(),
                 new CompatibleOperandsBinaryExpr(),
-                new ArrayAccesOnInt());
+                new ArrayAccesOnInt(),
+                new ArrayIndexNotIntPass());
     }
 
     @Override
