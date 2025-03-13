@@ -8,10 +8,7 @@ import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.comp2025.analysis.passes.ArrayAccesOnInt;
-import pt.up.fe.comp2025.analysis.passes.ArrayIndexNotIntPass;
-import pt.up.fe.comp2025.analysis.passes.CompatibleOperandsBinaryExpr;
-import pt.up.fe.comp2025.analysis.passes.UndeclaredVariable;
+import pt.up.fe.comp2025.analysis.passes.*;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -34,7 +31,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new UndeclaredVariable(),
                 new CompatibleOperandsBinaryExpr(),
                 new ArrayAccesOnInt(),
-                new ArrayIndexNotIntPass());
+                new ArrayIndexNotIntPass(),
+                new ObjectAssignment());
     }
 
     @Override
