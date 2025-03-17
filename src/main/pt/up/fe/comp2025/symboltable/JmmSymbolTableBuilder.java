@@ -55,22 +55,13 @@ public class JmmSymbolTableBuilder {
 
     private static List<String> buildImports(JmmNode root) {
         List<String> imports = new ArrayList<>();
-
         for (JmmNode child : root.getChildren()) {
             if (child.getKind().equals("ImportDecl")) {
-
-                StringBuilder importPath = new StringBuilder();
-
-                importPath.append(child.get("nameImport"));
-
-                for (JmmNode part : child.getChildren("ID")) {
-                    importPath.append(".").append(part.get("name"));
-                }
-
-                imports.add(importPath.toString());
+                List<String> parts = (List<String>) child.getObject("nameImport");            
+                String importPath = String.join(".", parts);
+                imports.add(importPath);
             }
         }
-
         return imports;
     }
 
