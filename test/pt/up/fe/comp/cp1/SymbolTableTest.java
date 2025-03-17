@@ -36,6 +36,13 @@ public class SymbolTableTest {
         assertEquals(2, semantics.getSymbolTable().getImports().size());
     }
 
+    //New Test! Should accept exactly the name expected ;)
+    @Test
+    public void ImportsNames() {
+        var semantics = test("symboltable/ImportsNames.jmm", false);
+        assertEquals("java.util.List", semantics.getSymbolTable().getImports().getFirst());
+    }
+
     @Test
     public void ClassAndSuper() {
         var semantics = test("symboltable/Super.jmm", false);

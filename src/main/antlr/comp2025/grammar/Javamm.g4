@@ -28,6 +28,7 @@ IMPORT: 'import';
 
 INTEGER : [1-9][0-9]*|[0];
 BOOLEAN : 'boolean' ;
+STRING: 'String';
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
@@ -64,6 +65,7 @@ type
     | name= INT '...'  #VarargsType
     | name= BOOLEAN   #BooleanType
     | name= ID    #IdType
+    | name = STRING  #StringType
     ;
 
 methodDecl locals[boolean isMain=false, boolean isPublic=false]
@@ -73,7 +75,7 @@ methodDecl locals[boolean isMain=false, boolean isPublic=false]
         '{' varDecl* stmt* '}'
 
     | {$isMain=true;} (PUBLIC {$isPublic=true;})?
-         STATIC VOID nameMethod=MAIN '(' name=ID '[' ']' name=ID ')'
+         STATIC VOID nameMethod=MAIN '(' STRING '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
 
