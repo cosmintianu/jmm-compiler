@@ -35,8 +35,6 @@ public class TypeUtils {
      * @return
      */
     public Type getExprType(JmmNode expr) {
-
-        // TODO: Update when there are new types
         return new Type("int", false);
     }
 
