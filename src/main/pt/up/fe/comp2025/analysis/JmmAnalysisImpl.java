@@ -33,7 +33,9 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new ArrayAccesOnInt(),
                 new ArrayIndexNotIntPass(),
                 new ObjectAssignment(),
-                new IfStatementPass());
+                new IfStatementPass(),
+                new WhileStatementPass(),
+                new UndeclaredMethodPass());
     }
 
     @Override
