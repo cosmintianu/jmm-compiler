@@ -4,6 +4,8 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTable;
 
 /**
@@ -37,16 +39,34 @@ public class TypeUtils {
     public Type getExprType(JmmNode expr) {
 
         // TODO: Update when there are new types
-        System.out.println("type: " + expr);
+        //System.out.println("type: " + expr);
         Type type = switch (Kind.fromString(expr.getKind())) {
             case INTEGER_LITERAL -> new Type("int", false);
-            case ARRAY_LITERAL -> new Type("int", true);
+            case ARRAY_LITERAL -> getArrayExprType(expr);
             case BINARY_EXPR ->getBinExprType(expr);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
+            case BOOLEAN_LITERAL -> new Type("boolean", false);
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 
         return type;
+    }
+
+    private Type getArrayExprType(JmmNode arrayExpr) {
+
+        var first_type = getExprType(arrayExpr.getChild(0));
+
+
+
+        for (var element : arrayExpr.getChildren()) {
+
+            if (!getExprType(element).equals(first_type)) {
+
+                return new Type("invalidArray", true);
+            }
+        }
+
+        return new Type("int", true);
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {
@@ -60,7 +80,6 @@ public class TypeUtils {
 
     private Type getVarRefExprType(JmmNode varRefExpr) {
 
-        System.out.println("getvarrefexpr");
         if(!varRefExpr.getAncestor(Kind.METHOD_DECL).isPresent())
             return null;
 
@@ -78,9 +97,7 @@ public class TypeUtils {
         }
 
         for (Symbol localVar : table.getLocalVariables(methodName)){
-            System.out.println("var  " + localVar);
             if (localVar.getName().equals(varName)){
-                System.out.println("localvar " + localVar);
                 return localVar.getType();
 
             }

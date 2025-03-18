@@ -35,20 +35,11 @@ public class ObjectAssignment extends AnalysisVisitor {
     }
 
     private Void visitAssignStmt(JmmNode assignStmt, SymbolTable table) {
-        // Get the operands
-        System.out.println(assignStmt);
-        System.out.println("children " + assignStmt.getChildren());
-        //System.out.println("assign name " + assignStmt.get("name"));
 
         // Get operand types
         TypeUtils typeUtils = new TypeUtils(table);
         String leftType = typeUtils.getExprType(assignStmt.getChild(0)).toString();
         String rightType = typeUtils.getExprType(assignStmt.getChild(1)).toString();
-
-        System.out.println("rightType: " + rightType);
-        System.out.println("leftType: " + leftType);
-
-        System.out.println("visit assign stmt");
 
         // If the types are not compatible, report an error
         if (!isTypeCompatible(rightType, leftType, table)) {
@@ -68,23 +59,18 @@ public class ObjectAssignment extends AnalysisVisitor {
         // Check if the first matches the second
         if (rightType.equals(leftType)) return true;
 
-        System.out.println("different");
-         return false;
+         // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
+        if (table.getImports().contains(rightType) && !primitiveTypes.contains(leftType)) return true;
 
-        //To prevent the case from ArrayInitWrong2 - assign an array to a non-array type
+        //Rule -> If the class extends another class, assume the method exists in one of the super classes
+        if (rightType.equals(table.getClassName()) && leftType.equals(table.getSuper())) return true;
 
-        // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
-//        if (table.getImports().contains(rightType) && !primitiveTypes.contains(leftType)) return true;
-//
-//        //Rule -> If the class extends another class, assume the method exists in one of the super classes
-//        if (rightType.equals(table.getClassName()) && leftType.equals(table.getSuper())) return true;
-//
-//        //Not sure about this rule to be honest :p
-//        if (rightType.equals("NewObjectExpr")) {
-//            return true;
-//        }
-//
-//        return false;
+        //Not sure about this rule to be honest :p
+        if (rightType.equals("NewObjectExpr")) {
+            return true;
+        }
+
+        return false;
     }
 
     private String getNodeType(JmmNode node, SymbolTable table) {
