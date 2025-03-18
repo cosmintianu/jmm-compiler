@@ -46,6 +46,7 @@ public class TypeUtils {
             case BINARY_EXPR ->getBinExprType(expr);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case BOOLEAN_LITERAL -> new Type("boolean", false);
+            case NEW_ARRAY_EXPR -> getArrayExprType(expr);
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 
