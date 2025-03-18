@@ -43,6 +43,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         var symbolTableBuilder = new JmmSymbolTableBuilder();
         SymbolTable table = symbolTableBuilder.build(rootNode);
 
+        System.out.println("symbol table: " + table);
+
         List<Report> reports = symbolTableBuilder.getReports();
 
         return new JmmSemanticsResult(parserResult, table, reports);
@@ -62,6 +64,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         // This is a simple implementation that assumes all passes are implemented as visitors, each one making a full visit of the AST.
         // There are other implementations that reduce the number of full AST visits, this is not required for the work, but a nice challenge if you want to try.
         for (var analysisVisitor : analysisVisitors) {
+            System.out.println("passing visitor: " + analysisVisitor.getClass().getSimpleName());
             try {
                 var passReports = analysisVisitor.analyze(rootNode, table);
 
