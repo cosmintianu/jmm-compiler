@@ -47,9 +47,11 @@ public class TypeUtils {
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case BOOLEAN_LITERAL -> new Type("boolean", false);
             case NEW_ARRAY_EXPR -> getArrayExprType(expr);
+            case NEW_OBJECT_EXPR -> new Type(expr.get("name"), false);
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 
+        //System.out.println("type " + type);
         return type;
     }
 

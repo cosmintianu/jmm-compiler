@@ -38,8 +38,8 @@ public class ObjectAssignment extends AnalysisVisitor {
 
         // Get operand types
         TypeUtils typeUtils = new TypeUtils(table);
-        String leftType = typeUtils.getExprType(assignStmt.getChild(0)).toString();
-        String rightType = typeUtils.getExprType(assignStmt.getChild(1)).toString();
+        Type leftType = typeUtils.getExprType(assignStmt.getChild(0));
+        Type rightType = typeUtils.getExprType(assignStmt.getChild(1));
 
         // If the types are not compatible, report an error
         if (!isTypeCompatible(rightType, leftType, table)) {
@@ -53,35 +53,22 @@ public class ObjectAssignment extends AnalysisVisitor {
         return null;
     }
 
-    public static boolean isTypeCompatible( String rightType, String leftType, SymbolTable table) {
-        List<String> primitiveTypes = List.of("int", "int[]", "boolean");
+    public static boolean isTypeCompatible( Type rightType, Type leftType, SymbolTable table) {
+
+        // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
+        if (table.getImports().contains(leftType.getName()) && table.getImports().contains(rightType.getName())) return true;
 
         // Check if the first matches the second
         if (rightType.equals(leftType)) return true;
 
-         // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
-        if (table.getImports().contains(rightType) && !primitiveTypes.contains(leftType)) return true;
-
         //Rule -> If the class extends another class, assume the method exists in one of the super classes
-        if (rightType.equals(table.getClassName()) && leftType.equals(table.getSuper())) return true;
+        if (rightType.toString().equals(table.getClassName()) && leftType.toString().equals(table.getSuper())) return true;
 
         //Not sure about this rule to be honest :p
-        if (rightType.equals("NewObjectExpr")) {
-            return true;
-        }
+//        if (rightType.equals("NewObjectExpr")) {
+//            return true;
+//        }
 
         return false;
-    }
-
-    private String getNodeType(JmmNode node, SymbolTable table) {
-        if (node.getKind().equals("VarRefExpr")) {
-            return table.getLocalVariables(currentMethod).stream()
-                    .filter(x -> x.getName().equals(node.get("name")))
-                    .map(Symbol::getType)
-                    .findFirst()
-                    .orElse(null)
-                    .getName();
-        }
-        return ("unknown kind: " + node.getKind());
     }
 }
