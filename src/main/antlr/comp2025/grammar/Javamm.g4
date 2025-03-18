@@ -56,12 +56,11 @@ classDecl
 
 
 varDecl
-    : type name=ID ';'
+    : nameType=type name=ID ';'
     ;
 
-type
-    : name= INT  #IntType
-    | name= INT '[' ']' #ArrayType
+type locals[ boolean isArray= false]
+    : name= INT ('[' ']' {$isArray = true;})? #IntType
     | name= INT '...'  #VarargsType
     | name= BOOLEAN   #BooleanType
     | name= ID    #ClassType
@@ -79,26 +78,19 @@ methodDecl locals[boolean isMain=false, boolean isPublic=false]
         '{' varDecl * stmt* '}'
     ;
 
-returnType
-    : name= INT
-    | name= BOOLEAN
-    | name= ID
-    ;
-
-
 param
-    : type name=ID
+    : nameType=type name=ID
     ;
 
 stmt
-    : expr '=' expr ';' #AssignStmt //
-    | RETURN expr ';' #ReturnStmt //
-    | '{' stmt* '}' #BracketStmt
+    : '{' stmt* '}' #BracketStmtexpr
     | IF '(' expr ')' stmt ELSE stmt #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
     | expr ';' #ExprStmt
-    | name=ID '=' expr ';' #VarAssignStmt
+    | expr '=' expr ';' #VarAssignStmt
     | name=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
+    //| '=' expr ';' #AssignStmt //
+    | RETURN expr ';' #ReturnStmt //
     ;
 
 expr

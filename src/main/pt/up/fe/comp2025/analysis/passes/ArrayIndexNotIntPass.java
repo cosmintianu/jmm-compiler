@@ -39,6 +39,7 @@ public class ArrayIndexNotIntPass extends AnalysisVisitor {
         }
 
         var message = String.format("Cannot access array through variable '%s' which is not an int.", varRefName);
+
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 varRefExpr.getLine(),

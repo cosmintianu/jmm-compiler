@@ -55,12 +55,6 @@ public class GrammarTest {
         TestUtils.parseVerbose("static void main(String[] args) {}", MAIN_METHOD);
     }
 
-    //New test! Should not accept unexpected structure
-    @Test (expected = RuntimeException.class)
-    public void testMainMethodStructure() {
-        TestUtils.parseVerbose("static void main(Avestruz[] args) {}", MAIN_METHOD);
-    }
-
     @Test
     public void testInstanceMethodEmpty() {
         TestUtils.parseVerbose("int foo(int anInt, int[] anArray, boolean aBool, String aString) {return a;}",
@@ -256,6 +250,12 @@ public class GrammarTest {
     @Test
     public void testExprArrayInit() {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
+    }
+
+    //New test! Should not accept unexpected structure
+    @Test (expected = RuntimeException.class)
+    public void testMainMethodStructure() {
+        TestUtils.parseVerbose("static void main(Avestruz[] args) {}", MAIN_METHOD);
     }
 
 }

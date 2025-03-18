@@ -48,7 +48,7 @@ public class JmmSymbolTableBuilder {
 
         JmmSymbolTable table = new JmmSymbolTable(className, superClassName, methods, returnTypes, params, locals, imports, fields);
 
-        System.out.println("Symbol Table generated: \n" + table);
+        //System.out.println("Symbol Table generated: \n" + table);
 
         return table;
     }
