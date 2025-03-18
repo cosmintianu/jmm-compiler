@@ -64,7 +64,7 @@ type
     | name= INT '[' ']' #ArrayType
     | name= INT '...'  #VarargsType
     | name= BOOLEAN   #BooleanType
-    | name= ID    #IdType
+    | name= ID    #ClassType
     | name = STRING  #StringType
     ;
 

@@ -6,7 +6,6 @@ import pt.up.fe.specs.util.SpecsStrings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Enum that mirrors the nodes that are supported by the AST.
@@ -15,21 +14,42 @@ import java.util.Set;
  */
 public enum Kind {
     PROGRAM,
+    IMPORT_DECL,
     CLASS_DECL,
     VAR_DECL,
-    ImportDecl,
-    TYPE,
+    INT_TYPE,
+    ARRAY_TYPE,
+    VARARGS_TYPE,
+    BOOLEAN_TYPE,
+    CLASS_TYPE,
+    STRING_TYPE,
     METHOD_DECL,
     PARAM,
-    STMT,
+    //STMT,
     ASSIGN_STMT,
     RETURN_STMT,
-    EXPR,
+    BRACKET_STMT,
+    IF_STMT,
+    ELSE_STMT,
+    WHILE_STMT,
+    EXPR_STMT,
+    VAR_ASSIGN_STMT,
+    ARRAY_ASSIGN_STMT,
+
+
     BINARY_EXPR,
-    INTEGER_LITERAL,
-    VAR_REF_EXPR,
     ARRAY_ACCESS_EXPR,
-    BOOLEAN;
+    LENGTH_EXPR,
+    METHOD_CALL_EXPR,
+    NEW_ARRAY_EXPR,
+    NEW_OBJECT_EXPR,
+    UNARY_EXPR,
+    PAREN_EXPR,
+    ARRAY_LITERAL_EXPR,
+    INTEGER_LITERAL,
+    BOOLEAN_LITERAL,
+    VAR_REF_EXPR,
+    THIS_EXPR;
 
 
     private final String name;
