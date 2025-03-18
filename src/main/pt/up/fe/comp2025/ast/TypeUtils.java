@@ -36,6 +36,10 @@ public class TypeUtils {
      */
     public Type getExprType(JmmNode expr) {
 
+        switch (Kind.fromString(expr.getKind())) {
+            case Kind.INTEGER_LITERAL -> newIntType();
+
+        }
         // TODO: Update when there are new types
         return new Type("int", false);
     }

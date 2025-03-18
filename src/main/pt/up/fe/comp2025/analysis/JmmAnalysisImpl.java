@@ -32,7 +32,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new CompatibleOperandsBinaryExpr(),
                 new ArrayAccesOnInt(),
                 new ArrayIndexNotIntPass(),
-                new ObjectAssignment());
+                new ObjectAssignment(),
+                new IfStatementPass());
     }
 
     @Override

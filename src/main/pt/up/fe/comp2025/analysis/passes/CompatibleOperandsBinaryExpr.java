@@ -24,13 +24,15 @@ public class CompatibleOperandsBinaryExpr extends AnalysisVisitor {
 
         // Check if the first is an int
         // and second matches the first
+
+        // TO DO: AND,OR
         if (leftType.equals(Kind.INTEGER_LITERAL.toString()) &&
                 leftType.equals(rightType)) {
             return null;
         }
 
         // Create error report
-        var message = String.format("Binary expression has type %s and left type %s", leftType, rightType);
+        var message = String.format("Binary expression has the left type %s and left type %s", leftType, rightType);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 binaryExpr.getLine(),
