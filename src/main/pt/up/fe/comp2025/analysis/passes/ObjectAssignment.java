@@ -61,20 +61,28 @@ public class ObjectAssignment extends AnalysisVisitor {
             }
 
             var superClass = table.getSuper();
-            String superClassString;
-            if (superClass != null) {
-//              superClassString = superClass.toString();
-            }
+//            String superClassString;
+//            if (superClass != null) {
+////              superClassString = superClass.toString();
+//            }
             if (superClass != null && leftType.equals(table.getSuper())) {
                 return null;
             }
 
             //TO DO Clean up
         }
-//        if (rightOperand.getKind().equals("VarRefExpr")) {
-//            System.out.println(rightOperand.get("nameExtendClass"));
+
+        if (rightType.equals("NewArrayExpr")) {
+            if (leftType.equals("VarRefExpr")) {
+                var actualType = table.getLocalVariables(currentMethod).stream().filter(x -> x.getName().equals(leftOperand.get("name"))).map(Symbol::getType).findFirst();
+                if (actualType.get().isArray()) {
+                    return null;
+                }
+            }
+
+
+        }
 //
-//        }
         // Create error report
         var message = String.format("Assignment expression has on the left type %s and right type %s", leftType, rightType);
         addReport(Report.newError(Stage.SEMANTIC, assignStmt.getLine(), assignStmt.getColumn(), message, null));

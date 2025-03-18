@@ -47,6 +47,10 @@ public class UndeclaredVariable extends AnalysisVisitor {
             return null;
         }
 
+        // Check if the variable is a global field
+        if (table.getFields().stream().anyMatch(field -> field.getName().equals(varRefName))) {
+            return null;
+        }
 
         // Create error report
         var message = String.format("Variable '%s' does not exist.", varRefName);
