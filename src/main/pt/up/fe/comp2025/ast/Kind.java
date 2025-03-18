@@ -13,6 +13,9 @@ import java.util.List;
  * This enum allows to handle nodes in a safer and more flexible way that using strings with the names of the nodes.
  */
 public enum Kind {
+    TYPE,
+    STMT,
+
     PROGRAM,
     IMPORT_DECL,
     CLASS_DECL,
@@ -25,7 +28,6 @@ public enum Kind {
     STRING_TYPE,
     METHOD_DECL,
     PARAM,
-    //STMT,
     ASSIGN_STMT,
     RETURN_STMT,
     BRACKET_STMT,

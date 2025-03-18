@@ -22,7 +22,7 @@ public class IfStatementPass extends AnalysisVisitor {
 
         String childType = child.getKind().toString();
 
-        if (childType.equals(Kind.BOOLEAN.toString())) {
+        if (childType.equals(Kind.BOOLEAN_TYPE.toString())) {
             return null;
         }
 
