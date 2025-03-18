@@ -47,22 +47,28 @@ public class ObjectAssignment extends AnalysisVisitor {
         // and second matches the first
         if (leftType.equals(rightType)) {
             if (leftType.equals("VarRefExpr")) {
-                leftType = table.getLocalVariables(currentMethod).stream().filter(x -> x.getName().equals(leftOperand.get("name"))).map(Symbol::getType).findFirst().orElse(null).getName().toString();
+                leftType = table.getLocalVariables(currentMethod).stream().filter(x -> x.getName().equals(leftOperand.get("name"))).map(Symbol::getType).findFirst().orElse(null).getName(); //Call to 'toString()' was redundant
             }
             if (rightType.equals("VarRefExpr")) {
-                rightType = table.getLocalVariables(currentMethod).stream().filter(x -> x.getName().equals(rightOperand.get("name"))).map(Symbol::getType).findFirst().orElse(null).getName().toString();
+                rightType = table.getLocalVariables(currentMethod).stream().filter(x -> x.getName().equals(rightOperand.get("name"))).map(Symbol::getType).findFirst().orElse(null).getName();
 //                System.out.println(Optional.of(var.get("nameExtendClass")));
 //                System.out.println(table.getSuper().toString());
-
-                var superClass = table.getSuper();
-                String superClassString;
-                if (superClass != null) {
-//                    superClassString = superClass.toString();
-                }
-                if (superClass != null && leftType.equals(table.getSuper().toString())) {
-                    return null;
-                }
             }
+
+            // Add verification -> if a class is being imported, assume the types of the expression where it is used are correct
+            if (table.getImports().contains(leftType) && table.getImports().contains(rightType)) {
+                return null;
+            }
+
+            var superClass = table.getSuper();
+            String superClassString;
+            if (superClass != null) {
+//              superClassString = superClass.toString();
+            }
+            if (superClass != null && leftType.equals(table.getSuper())) {
+                return null;
+            }
+
             //TO DO Clean up
         }
 //        if (rightOperand.getKind().equals("VarRefExpr")) {
