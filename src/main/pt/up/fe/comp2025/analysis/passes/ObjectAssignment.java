@@ -62,12 +62,7 @@ public class ObjectAssignment extends AnalysisVisitor {
         if (rightType.equals(leftType)) return true;
 
         //Rule -> If the class extends another class, assume the method exists in one of the super classes
-        if (rightType.toString().equals(table.getClassName()) && leftType.toString().equals(table.getSuper())) return true;
-
-        //Not sure about this rule to be honest :p
-//        if (rightType.equals("NewObjectExpr")) {
-//            return true;
-//        }
+        if (rightType.getName().equals(table.getClassName()) && leftType.getName().equals(table.getSuper())) return true;
 
         return false;
     }
