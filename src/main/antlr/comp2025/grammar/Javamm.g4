@@ -107,8 +107,8 @@ expr
     | expr op='<' expr #BinaryExpr
     | expr op=('&&' | '||') expr #BinaryExpr
     | value=INTEGER #IntegerLiteral
-    | TRUE #BooleanLiteral
-    | FALSE #BooleanLiteral
+    | value=TRUE #BooleanLiteral
+    | value=FALSE #BooleanLiteral
     | name=ID #VarRefExpr
     | THIS #ThisExpr
     ;
