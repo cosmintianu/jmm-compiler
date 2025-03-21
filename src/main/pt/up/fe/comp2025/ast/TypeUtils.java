@@ -4,8 +4,6 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTable;
 
 /**
@@ -46,11 +44,12 @@ public class TypeUtils {
         // TODO: Update when there are new types
         //System.out.println("type: " + expr);
         Type type = switch (Kind.fromString(expr.getKind())) {
-            case BINARY_EXPR ->getBinExprType(expr);
-            case METHOD_CALL_EXPR-> getMethodExprType(expr);
+            case BINARY_EXPR -> getBinExprType(expr);
+            case METHOD_CALL_EXPR -> getMethodExprType(expr);
             //case UNARY_EXPR, PAREN_EXPR
-            case NEW_ARRAY_EXPR, ARRAY_LITERAL,LENGTH_EXPR, INTEGER_LITERAL -> new Type("int", true);
+            case NEW_ARRAY_EXPR, ARRAY_LITERAL, LENGTH_EXPR -> new Type("int", true);
             case NEW_OBJECT_EXPR -> new Type(expr.get("name"), false);
+            case INTEGER_LITERAL -> new Type("int", false);
             case BOOLEAN_LITERAL -> new Type("boolean", false);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case THIS_EXPR -> new Type("this", false);
@@ -71,7 +70,7 @@ public class TypeUtils {
     private static Type getBinExprType(JmmNode binaryExpr) {
 
         return switch (binaryExpr.get("op")) {
-            case "+", "*","-", "/" -> new Type("int", false);
+            case "+", "*", "-", "/" -> new Type("int", false);
             case "&&", "||", "<", "!" -> new Type("boolean", false);
             default -> throw new RuntimeException("Unknown operator '" + binaryExpr.get("op"));
         };
@@ -79,24 +78,24 @@ public class TypeUtils {
 
     private Type getVarRefExprType(JmmNode varRefExpr) {
 
-        if(varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty())
+        if (varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty())
             return null;
 
         String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
         String varName = varRefExpr.get("name");
 
-        for (Symbol field : table.getFields()){
+        for (Symbol field : table.getFields()) {
             if (field.getName().equals(varName))
                 return field.getType();
         }
 
-        for (Symbol param : table.getParameters(methodName)){
+        for (Symbol param : table.getParameters(methodName)) {
             if (param.getName().equals(varName))
                 return param.getType();
         }
 
-        for (Symbol localVar : table.getLocalVariables(methodName)){
-            if (localVar.getName().equals(varName)){
+        for (Symbol localVar : table.getLocalVariables(methodName)) {
+            if (localVar.getName().equals(varName)) {
                 return localVar.getType();
 
             }

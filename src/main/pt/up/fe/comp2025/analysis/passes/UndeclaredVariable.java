@@ -14,12 +14,20 @@ import pt.up.fe.specs.util.SpecsCheck;
 public class UndeclaredVariable extends AnalysisVisitor {
 
     private String currentMethod;
+    private String currentClass;
 
     @Override
     public void buildVisitor() {
+        addVisit(Kind.CLASS_DECL, this::visitClassDecl);
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
         addVisit(Kind.CLASS_TYPE, this::visitClassType);
+    }
+
+    private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
+        currentClass = classDecl.get("name");
+//        System.out.println("Class " + currentClass);
+        return null;
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -30,8 +38,10 @@ public class UndeclaredVariable extends AnalysisVisitor {
     private Void visitClassType(JmmNode classType, SymbolTable table) {
         var className = classType.get("name");
 
-        // Debug
-        //System.out.println("Class " + className);
+        // Check if the object has the same class as the current one
+        if (currentClass.equals(className)) {
+            return null;
+        }
 
         // Check if the class name is an imported class
         if (table.getImports().stream().map(importDecl -> importDecl.substring(importDecl.lastIndexOf('.') + 1)) // Extract simple class name
