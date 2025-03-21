@@ -14,10 +14,10 @@ public class Array extends AnalysisVisitor {
         addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
     }
 
-    //Prevents trying to access an array through an invalid variable
+    // Prevents trying to access an array through an invalid variable
     private Void visitIndexAccessExpr(JmmNode array, SymbolTable table) {
 
-        //I rewrote ArrayIndexNotIntPass & ArrayAccesOnInt here! @cosmin
+        //I rewrote ArrayIndexNotIntPass & ArrayAccesOnInt here! @cosmin Thank you @Amanda
         TypeUtils typeUtils = new TypeUtils(table);
 
         JmmNode child_1 = array.getChild(1);
@@ -37,7 +37,7 @@ public class Array extends AnalysisVisitor {
         return null;
     }
 
-    //Prevents an array of being composed by different elements
+    // Prevents an array of being composed by different elements
     private Void visitArrayLiteral(JmmNode array, SymbolTable table) {
 
         if (array.getChildren().isEmpty()) return null;

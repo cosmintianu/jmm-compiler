@@ -32,7 +32,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new BinaryExpr(),
                 new Method(),
                 new Array(),
-                new ObjectAssignment(),
+                new Assignment(),
                 new IfStatementPass(),
                 new WhileStatementPass(),
                 new UndeclaredMethodPass());

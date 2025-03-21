@@ -3,8 +3,6 @@ package pt.up.fe.comp2025.analysis.passes;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
@@ -34,7 +32,8 @@ public class BinaryExpr extends AnalysisVisitor {
 
         // Check int operations
         if (opType.getName().equals("int") || binaryExpr.get("op").equals("<")) {
-            if (leftOperandType.getName().equals("int") && rightOperandType.getName().equals("int")) {
+            if (leftOperandType.getName().equals("int") && rightOperandType.getName().equals("int")
+                    && leftOperandType.isArray() == rightOperandType.isArray()) {
                 return null;
             }
         }
@@ -48,8 +47,8 @@ public class BinaryExpr extends AnalysisVisitor {
 
         // Create error report
         addNewErrorReport(binaryExpr, "Binary expression has the left type " +
-                        leftOperandType.getName()+ " and left type " + rightOperandType.getName());
+                leftOperandType.getName() + " and left type " + rightOperandType.getName());
 
-       return null;
+        return null;
     }
 }

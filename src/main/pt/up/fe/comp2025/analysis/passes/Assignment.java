@@ -1,6 +1,5 @@
 package pt.up.fe.comp2025.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -10,9 +9,7 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
-import java.util.List;
-
-public class ObjectAssignment extends AnalysisVisitor {
+public class Assignment extends AnalysisVisitor {
 
     private String currentMethod;
 
@@ -53,16 +50,18 @@ public class ObjectAssignment extends AnalysisVisitor {
         return null;
     }
 
-    public static boolean isTypeCompatible( Type rightType, Type leftType, SymbolTable table) {
+    public static boolean isTypeCompatible(Type rightType, Type leftType, SymbolTable table) {
 
         // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
-        if (table.getImports().contains(leftType.getName()) && table.getImports().contains(rightType.getName())) return true;
+        if (table.getImports().contains(leftType.getName()) && table.getImports().contains(rightType.getName()))
+            return true;
 
         // Check if the first matches the second
         if (rightType.equals(leftType)) return true;
 
-        //Rule -> If the class extends another class, assume the method exists in one of the super classes
-        if (rightType.getName().equals(table.getClassName()) && leftType.getName().equals(table.getSuper())) return true;
+        // Rule -> If the class extends another class, assume the method exists in one of the super classes
+        if (rightType.getName().equals(table.getClassName()) && leftType.getName().equals(table.getSuper()))
+            return true;
 
         return false;
     }

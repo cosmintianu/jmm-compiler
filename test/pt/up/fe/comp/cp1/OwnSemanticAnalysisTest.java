@@ -48,4 +48,10 @@ public class OwnSemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
+    @Test
+    public void AssignIntToInt() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/AssignIntToInt.jmm"));
+        TestUtils.noErrors(result);
+    }
+
 }
