@@ -40,7 +40,7 @@ public enum Kind {
 
 
     BINARY_EXPR,
-    ARRAY_ACCESS_EXPR,
+    INDEX_ACCESS_EXPR,
     LENGTH_EXPR,
     METHOD_CALL_EXPR,
     NEW_ARRAY_EXPR,

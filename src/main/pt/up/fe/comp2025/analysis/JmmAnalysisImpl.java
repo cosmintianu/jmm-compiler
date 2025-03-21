@@ -30,9 +30,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         return List.of(
                 new UndeclaredVariable(),
                 new CompatibleOperandsBinaryExpr(),
+                new Method(),
                 new Array(),
-                //new ArrayAccesOnInt(),
-                //new ArrayIndexNotIntPass(),
                 new ObjectAssignment(),
                 new IfStatementPass(),
                 new WhileStatementPass(),

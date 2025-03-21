@@ -25,9 +25,14 @@ public class TypeUtils {
     }
 
     public static Type convertType(JmmNode typeNode) {
+
         var name = typeNode.get("name");
         var isArray = Boolean.parseBoolean(typeNode.get("isArray"));
-        return new Type(name, isArray);
+
+        Type newType = new Type(name, isArray);
+        newType.putObject("isVarargs", typeNode.get("isVarargs"));
+
+        return newType;
     }
 
     /**

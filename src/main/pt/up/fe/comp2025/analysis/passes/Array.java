@@ -11,11 +11,11 @@ public class Array extends AnalysisVisitor{
     @Override
     protected void buildVisitor() {
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
-        addVisit(Kind.ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
+        addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
     }
 
     //Prevents trying to access an array through an invalid variable
-    private Void visitArrayAccessExpr(JmmNode array, SymbolTable table) {
+    private Void visitIndexAccessExpr(JmmNode array, SymbolTable table) {
 
         //I rewrote ArrayIndexNotIntPass & ArrayAccesOnInt here! @cosmin
         TypeUtils typeUtils = new TypeUtils(table);
@@ -28,7 +28,7 @@ public class Array extends AnalysisVisitor{
         if (!child_1_name.equals("int")) {
             var message = String.format("Cannot access array through variable '%s' which is not an int.", child_1.get("name"));
             addNewReport(child_1, message);
-        } else if (!typeUtils.getExprType(child_0).isArray()) {
+        } else if ( (!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
             var message = String.format("Cannot index variable '%s' because it is not an array.", child_0.get("name"));
             addNewReport(child_0, message);
         }
