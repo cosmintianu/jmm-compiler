@@ -6,7 +6,7 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
-public class Array extends AnalysisVisitor{
+public class Array extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
@@ -27,11 +27,11 @@ public class Array extends AnalysisVisitor{
 
         if (!child_1_name.equals("int")) {
             var message = String.format("Cannot access array/varargs through variable '%s' which is not an int.", child_1.get("name"));
-            addNewReport(child_1, message);
-        } else if ( (!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
+            addNewErrorReport(child_1, message);
+        } else if ((!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
             System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
             var message = String.format("Cannot index variable '%s' because it is not an array or varargs.", child_0.get("name"));
-            addNewReport(child_0, message);
+            addNewErrorReport(child_0, message);
         }
 
         return null;
@@ -46,7 +46,7 @@ public class Array extends AnalysisVisitor{
         for (var element : array.getChildren()) {
             if (!element.getKind().equals(first_type)) {
                 var message = String.format("Array cannot be composed of different types '%s' and '%s'", first_type, element);
-                addNewReport(element, message);
+                addNewErrorReport(element, message);
                 return null;
             }
         }
