@@ -1,0 +1,14 @@
+// Check if no imported class fails
+
+class VarNotDeclared5 {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo(){
+        A a;
+
+        return a;
+    }
+}

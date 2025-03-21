@@ -1,0 +1,11 @@
+// Check if variable is recognized as method parameter
+
+class VarNotDeclared3 {
+
+    public static void main(String[] args) {
+
+    }
+    public int foo(int x) {
+        return x;
+    }
+}

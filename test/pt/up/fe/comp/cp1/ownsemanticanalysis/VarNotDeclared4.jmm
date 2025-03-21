@@ -1,0 +1,12 @@
+// Check if variable is recognized as a global field
+
+class VarNotDeclared3 {
+    int x;
+
+    public static void main(String[] args) {
+
+    }
+    public int foo() {
+        return x;
+    }
+}

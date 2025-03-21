@@ -21,8 +21,13 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         setDefaultValue(() -> null);
     }
 
-    //Aux function to add reports easily
-    protected void addNewReport (JmmNode node, String message ){
+    /**
+     * Add new error report easily
+     *
+     * @param node Node that contains the error.
+     * @param message String which details the error.
+     */
+    protected void addNewErrorReport(JmmNode node, String message) {
         this.addReport(Report.newError(
                 Stage.SEMANTIC,
                 node.getLine(),

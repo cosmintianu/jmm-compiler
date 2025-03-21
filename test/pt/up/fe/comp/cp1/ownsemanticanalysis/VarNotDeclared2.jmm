@@ -1,0 +1,10 @@
+// Check if variable is recognized as local variable
+
+class VarNotDeclared2 {
+
+    public static void main(String[] args) {
+        int a;
+
+        return a;
+    }
+}
