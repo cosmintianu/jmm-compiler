@@ -74,7 +74,7 @@ public class TypeUtils {
 
     private Type getVarRefExprType(JmmNode varRefExpr) {
 
-        if(!varRefExpr.getAncestor(Kind.METHOD_DECL).isPresent())
+        if(varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty())
             return null;
 
         String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
