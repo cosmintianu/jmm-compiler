@@ -35,7 +35,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new ObjectAssignment(),
                 new IfStatementPass(),
                 new WhileStatementPass(),
-                new UndeclaredMethodPass());
+                new UndeclaredMethodPass(),
+                new Array());
     }
 
     @Override
@@ -97,6 +98,5 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         return new JmmSemanticsResult(semanticsResult, reports);
     }
-
 
 }

@@ -72,7 +72,6 @@ public class JmmSymbolTable extends AJmmSymbolTable {
         return returnTypes.get(methodSignature);
     }
 
-
     @Override
     public List<Symbol> getParameters(String methodSignature) {
         return params.get(methodSignature);

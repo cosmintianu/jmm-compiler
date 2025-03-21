@@ -41,13 +41,14 @@ public class TypeUtils {
         // TODO: Update when there are new types
         //System.out.println("type: " + expr);
         Type type = switch (Kind.fromString(expr.getKind())) {
-            case INTEGER_LITERAL -> new Type("int", false);
-            case ARRAY_LITERAL -> getArrayExprType(expr);
             case BINARY_EXPR ->getBinExprType(expr);
-            case VAR_REF_EXPR -> getVarRefExprType(expr);
-            case BOOLEAN_LITERAL -> new Type("boolean", false);
-            case NEW_ARRAY_EXPR -> getArrayExprType(expr);
+            case METHOD_CALL_EXPR-> getMethodExprType(expr);
+            //case UNARY_EXPR, PAREN_EXPR
+            case NEW_ARRAY_EXPR, ARRAY_LITERAL,LENGTH_EXPR, INTEGER_LITERAL -> new Type("int", true);
             case NEW_OBJECT_EXPR -> new Type(expr.get("name"), false);
+            case BOOLEAN_LITERAL -> new Type("boolean", false);
+            case VAR_REF_EXPR -> getVarRefExprType(expr);
+            case THIS_EXPR -> new Type("this", false);
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 
@@ -55,28 +56,18 @@ public class TypeUtils {
         return type;
     }
 
-    private Type getArrayExprType(JmmNode arrayExpr) {
+    private Type getMethodExprType(JmmNode methodExpr) {
+        String idName = methodExpr.get("name");
 
-        var first_type = getExprType(arrayExpr.getChild(0));
-
-
-
-        for (var element : arrayExpr.getChildren()) {
-
-            if (!getExprType(element).equals(first_type)) {
-
-                return new Type("invalidArray", true);
-            }
-        }
-
-        return new Type("int", true);
+        return table.getReturnType(idName);
     }
+
 
     private static Type getBinExprType(JmmNode binaryExpr) {
 
         return switch (binaryExpr.get("op")) {
             case "+", "*","-", "/" -> new Type("int", false);
-            case "&&", "<", "!" -> new Type("boolean", false);
+            case "&&", "||", "<", "!" -> new Type("boolean", false);
             default -> throw new RuntimeException("Unknown operator '" + binaryExpr.get("op"));
         };
     }

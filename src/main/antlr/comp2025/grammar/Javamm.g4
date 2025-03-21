@@ -94,19 +94,22 @@ stmt
     ;
 
 expr
-    : expr op=('&&' | '<' | '+' | '-' | '*' | '/' ) expr #BinaryExpr
+    : '(' expr ')' #ParenExpr
     | expr '[' expr ']' #ArrayAccessExpr
-    | expr '.' LENGTH #LengthExpr
-    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
+    | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | NEW INT '[' expr ']' #NewArrayExpr
     | NEW name=ID '(' ')' #NewObjectExpr
+    | expr '.' LENGTH #LengthExpr
+    | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
+    | expr op=( '*' | '/' ) expr #BinaryExpr
+    | expr op=( '+' | '-') expr #BinaryExpr
     | '!' expr #UnaryExpr
-    | '(' expr ')' #ParenExpr
-    | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
+    | expr op='<' expr #BinaryExpr
+    | expr op=('&&' | '||') expr #BinaryExpr
     | value=INTEGER #IntegerLiteral
-    | TRUE #BooleanLiteral
-    | FALSE #BooleanLiteral
-    | name=ID #VarRefExpr //
+    | value=TRUE #BooleanLiteral
+    | value=FALSE #BooleanLiteral
+    | name=ID #VarRefExpr
     | THIS #ThisExpr
     ;
 
