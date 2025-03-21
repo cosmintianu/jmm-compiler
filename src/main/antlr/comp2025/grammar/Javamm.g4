@@ -59,9 +59,9 @@ varDecl
     : nameType=type name=ID ';'
     ;
 
-type locals[ boolean isArray= false]
+type locals[ boolean isArray= false, boolean isVarargs= false]
     : name= INT ('[' ']' {$isArray = true;})? #IntType
-    | name= INT '...'  #VarargsType
+    | name= INT '...' {$isVarargs = true;} #VarargsType
     | name= BOOLEAN   #BooleanType
     | name= ID    #ClassType
     | name = STRING  #StringType
@@ -95,7 +95,7 @@ stmt
 
 expr
     : '(' expr ')' #ParenExpr
-    | expr '[' expr ']' #ArrayAccessExpr
+    | expr '[' expr ']' #IndexAccessExpr
     | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | NEW INT '[' expr ']' #NewArrayExpr
     | NEW name=ID '(' ')' #NewObjectExpr

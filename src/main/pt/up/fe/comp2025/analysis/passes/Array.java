@@ -6,16 +6,16 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
-public class Array extends AnalysisVisitor {
+public class Array extends AnalysisVisitor{
 
     @Override
     protected void buildVisitor() {
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
-        addVisit(Kind.ARRAY_ACCESS_EXPR, this::visitArrayAccessExpr);
+        addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
     }
 
     //Prevents trying to access an array through an invalid variable
-    private Void visitArrayAccessExpr(JmmNode array, SymbolTable table) {
+    private Void visitIndexAccessExpr(JmmNode array, SymbolTable table) {
 
         //I rewrote ArrayIndexNotIntPass & ArrayAccesOnInt here! @cosmin
         TypeUtils typeUtils = new TypeUtils(table);
@@ -26,11 +26,12 @@ public class Array extends AnalysisVisitor {
         JmmNode child_0 = array.getChild(0);
 
         if (!child_1_name.equals("int")) {
-            var message = String.format("Cannot access array through variable '%s' which is not an int.", child_1.get("name"));
-            addNewErrorReport(child_1, message);
-        } else if (!typeUtils.getExprType(child_0).isArray()) {
-            var message = String.format("Cannot index variable '%s' because it is not an array.", child_0.get("name"));
-            addNewErrorReport(child_0, message);
+            var message = String.format("Cannot access array/varargs through variable '%s' which is not an int.", child_1.get("name"));
+            addNewReport(child_1, message);
+        } else if ( (!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
+            System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
+            var message = String.format("Cannot index variable '%s' because it is not an array or varargs.", child_0.get("name"));
+            addNewReport(child_0, message);
         }
 
         return null;
@@ -45,7 +46,7 @@ public class Array extends AnalysisVisitor {
         for (var element : array.getChildren()) {
             if (!element.getKind().equals(first_type)) {
                 var message = String.format("Array cannot be composed of different types '%s' and '%s'", first_type, element);
-                addNewErrorReport(element, message);
+                addNewReport(element, message);
                 return null;
             }
         }
