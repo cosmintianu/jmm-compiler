@@ -28,7 +28,7 @@ public class Method extends AnalysisVisitor {
             //if it is a varargs type and not in the last position
             if ( param.contains("VarargsType") && i!=(parameters.size()-1) ){
                 var message = String.format("Varargs '%s' must be the last parameter in the method declaration.", parameters.get(i).get("name"));
-                addNewReport(parameters.get(i), message);
+                addNewErrorReport(parameters.get(i), message);
             }
         }
 

@@ -48,7 +48,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Debug
-        System.out.println("Checking Undeclared Variable");
+//        System.out.println("Checking Undeclared Variable");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var varRefName = varRefExpr.get("name");

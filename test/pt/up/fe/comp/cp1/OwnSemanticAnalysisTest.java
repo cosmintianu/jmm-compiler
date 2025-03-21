@@ -36,4 +36,16 @@ public class OwnSemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
+    @Test
+    public void IntLessThanBoolean() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/IntLessThanBoolean.jmm"));
+        TestUtils.mustFail(result);
+    }
+
+    @Test
+    public void ObjectAndInt() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ObjectAndInt.jmm"));
+        TestUtils.mustFail(result);
+    }
+
 }

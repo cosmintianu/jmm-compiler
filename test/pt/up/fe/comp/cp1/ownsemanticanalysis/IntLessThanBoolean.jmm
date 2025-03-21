@@ -1,0 +1,12 @@
+class IntLessThanBoolean {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo() {
+        boolean a;
+
+        return 10 < a;
+    }
+}
