@@ -26,10 +26,11 @@ public class Array extends AnalysisVisitor{
         JmmNode child_0 = array.getChild(0);
 
         if (!child_1_name.equals("int")) {
-            var message = String.format("Cannot access array through variable '%s' which is not an int.", child_1.get("name"));
+            var message = String.format("Cannot access array/varargs through variable '%s' which is not an int.", child_1.get("name"));
             addNewReport(child_1, message);
         } else if ( (!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
-            var message = String.format("Cannot index variable '%s' because it is not an array.", child_0.get("name"));
+            System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
+            var message = String.format("Cannot index variable '%s' because it is not an array or varargs.", child_0.get("name"));
             addNewReport(child_0, message);
         }
 

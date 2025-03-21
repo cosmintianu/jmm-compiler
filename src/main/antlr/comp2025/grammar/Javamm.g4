@@ -95,7 +95,7 @@ stmt
 
 expr
     : '(' expr ')' #ParenExpr
-    | expr '[' expr ']' #IndexedAccessExpr
+    | expr '[' expr ']' #IndexAccessExpr
     | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | NEW INT '[' expr ']' #NewArrayExpr
     | NEW name=ID '(' ')' #NewObjectExpr
