@@ -11,6 +11,8 @@ import java.util.List;
 
 public class Method extends AnalysisVisitor {
 
+    private boolean isMethodStatic;
+
     @Override
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDeclaration);
@@ -19,6 +21,7 @@ public class Method extends AnalysisVisitor {
 
     // Prevents varargs from being declared as any argument other than the last
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
+        isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
 
         List<JmmNode> parameters = method.getChildren(Kind.PARAM);
 
@@ -56,6 +59,11 @@ public class Method extends AnalysisVisitor {
 
         // Check if the super class of the variable is imported, return
         if (table.getImports().stream().anyMatch(methodName -> methodName.equals(table.getSuper()))) {
+            return null;
+        }
+
+        // Check if class is not static "this" can be used, return
+        if (!isMethodStatic && varType.getName().equals("this")) {
             return null;
         }
 
