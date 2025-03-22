@@ -75,8 +75,8 @@ methodDecl locals[boolean isMain=false, boolean isPublic=false, boolean isStatic
         '{' varDecl* stmt* '}'
 
     | {$isMain=true;}
-        PUBLIC {$isPublic=true;}
-        STATIC {$isStatic=true;}
+        (PUBLIC {$isPublic=true;})?
+        (STATIC {$isStatic=true;})
          VOID nameMethod=MAIN '(' STRING '[' ']' name=ID ')'
         '{' varDecl * stmt* '}'
     ;
