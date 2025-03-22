@@ -34,18 +34,21 @@ public class OwnSemanticAnalysisTest {
     public void varNotDeclared6() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/VarNotDeclared6.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
     public void IntLessThanBoolean() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/IntLessThanBoolean.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
     public void ObjectAndInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ObjectAndInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
