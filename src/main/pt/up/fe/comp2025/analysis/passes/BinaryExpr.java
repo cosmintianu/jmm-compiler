@@ -47,7 +47,8 @@ public class BinaryExpr extends AnalysisVisitor {
 
         // Create error report
         addNewErrorReport(binaryExpr, "Binary expression has the left type " +
-                leftOperandType.getName() + " and left type " + rightOperandType.getName());
+                leftOperandType.getName() + " (array:" + leftOperandType.isArray() + ")" +
+                " and left type " + rightOperandType.getName() + " (array:" + rightOperandType.isArray() + ")");
 
         return null;
     }
