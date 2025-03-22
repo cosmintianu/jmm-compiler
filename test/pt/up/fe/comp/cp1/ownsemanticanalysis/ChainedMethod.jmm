@@ -1,0 +1,19 @@
+class Test {
+
+    public Test func(){
+
+        Test s;
+         s = new Test();
+
+        return s;
+    }
+
+    public int func2(int x) {
+
+        return x;
+    }
+
+    public static void main(String[] args) {}
+
+
+}

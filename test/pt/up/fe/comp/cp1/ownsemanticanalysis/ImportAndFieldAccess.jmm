@@ -1,0 +1,18 @@
+import Bar;
+
+class Test {
+
+    int number1;
+    Bar instanceField;
+
+    public int calculateSum(int first, int second) {
+        int result;
+        result = first + this.calculateConstant();
+        return result;
+    }
+
+    public int calculateConstant() {
+        return 5 + number1;
+    }
+
+}

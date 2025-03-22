@@ -57,4 +57,53 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void WhileLoop() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WhileLoop.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ImportJavaio() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ImportJavaio.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+
+    @Test
+    public void MathOperations() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/MathOperations.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ReturnArray() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ReturnArray.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ImportAndFieldAccess() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ImportAndFieldAccess.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ChainedMethod() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ChainedMethod.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void FieldAssign() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/FieldAssign.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void InstanceVariable() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/InstanceVariable.jmm"));
+        TestUtils.noErrors(result);
+    }
+
 }

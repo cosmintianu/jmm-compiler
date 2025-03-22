@@ -40,7 +40,7 @@ public class Method extends AnalysisVisitor {
     }
 
     // Check undeclared method pass
-    // Moved it here @Amanda
+    // Moved it here @Amanda Oks, got it! @cosmin
     private Void visitMethodCallExpr(JmmNode methodCallExpr, SymbolTable table) {
         TypeUtils typeUtils = new TypeUtils(table);
 

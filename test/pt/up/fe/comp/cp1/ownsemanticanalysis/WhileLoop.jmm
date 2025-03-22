@@ -1,0 +1,14 @@
+class Test {
+
+    public static void main(String[] args) {
+
+        int k;
+        k = 2;
+
+        while(k < 10){
+           k = k + 2;
+        }
+    }
+
+
+}

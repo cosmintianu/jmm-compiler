@@ -1,0 +1,19 @@
+import io;
+
+class ReturnArray {
+
+    public static void main(String[] args) {
+        int[] arr;
+        arr = this.createArray();
+        io.println(arr[0]);
+        io.println(arr[1]);
+    }
+
+    public int[] createArray() {
+        int[] newArray;
+        newArray = new int[2];
+        newArray[0] = 10;
+        newArray[1] = 20;
+        return newArray;
+    }
+}

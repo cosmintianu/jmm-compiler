@@ -1,0 +1,29 @@
+import io;
+
+class Test {
+
+    int value;
+
+    public static void main(String[] args) {
+
+        Test instance;
+        instance = new Test();
+
+        instance.setValue(10);
+        instance.displayValue();
+
+        instance.setValue(20);
+        instance.displayValue();
+    }
+
+    public int setValue(int newValue) {
+        value = newValue;
+        return 0;
+    }
+
+    public int displayValue() {
+        io.println(value);
+        return 0;
+    }
+
+}

@@ -1,0 +1,27 @@
+import random.imp;
+
+class Example {
+
+    int attribute;
+
+    public static void main(String[] args) {
+
+        int result;
+        Example obj;
+
+        obj = new Example();
+        result = obj.setValue(5);
+
+        result = obj.getValue();
+    }
+
+    public int setValue(int newValue) {
+        attribute = newValue;
+        return 0;
+    }
+
+    public int getValue() {
+        return attribute;
+    }
+
+}

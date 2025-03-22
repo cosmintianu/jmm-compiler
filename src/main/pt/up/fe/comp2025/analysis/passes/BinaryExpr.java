@@ -16,7 +16,7 @@ public class BinaryExpr extends AnalysisVisitor {
 
     private Void visitBinaryExpr(JmmNode binaryExpr, SymbolTable table) {
         // Debug
-        System.out.println("Checking Binary Expression");
+        //System.out.println("Checking Binary Expression");
 
         TypeUtils typeUtils = new TypeUtils(table);
 
