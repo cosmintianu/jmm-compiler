@@ -47,7 +47,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case METHOD_CALL_EXPR -> getMethodExprType(expr);
             case PAREN_EXPR -> getParentExprType(expr);
-            //case UNARY_EXPR, PAREN_EXPR
+            //case UNARY_EXPR
             case NEW_ARRAY_EXPR, ARRAY_LITERAL -> new Type("int", true);
             case NEW_OBJECT_EXPR, CLASS_TYPE -> new Type(expr.get("name"), false);
             case INTEGER_LITERAL, LENGTH_EXPR -> new Type("int", false);

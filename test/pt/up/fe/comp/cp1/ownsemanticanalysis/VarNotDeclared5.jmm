@@ -8,7 +8,7 @@ class VarNotDeclared5 {
 
     }
 
-    public int foo(){
+    public A foo(){
         A a;
 
         return a;
