@@ -1,8 +1,11 @@
-class ReturnArray {
+class ReturnArrayCorrect {
 
     public static void main(String[] args) {
         int[] arr;
-        arr = this.createArray();
+        ReturnArrayCorrect obj;
+        obj = new ReturnArrayCorrect();
+        arr = obj.createArray();
+
     }
 
     public int[] createArray() {

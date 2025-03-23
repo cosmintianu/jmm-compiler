@@ -140,7 +140,7 @@ public class Method extends AnalysisVisitor {
 //        System.out.println("DAaaaaaaaaaaaaa " + methodParam);
 
         if (!printMethodNotDeclaredReport) {
-            addNewErrorReport(methodCallExpr, "Variable " + varType.getName() + " on which a method is called is not declared.");
+            addNewErrorReport(methodCallExpr, "Variable '" + varType.getName() + "' on which a method is called is not declared.");
         }
         return null;
     }
