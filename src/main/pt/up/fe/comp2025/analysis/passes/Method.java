@@ -12,12 +12,20 @@ import java.util.List;
 public class Method extends AnalysisVisitor {
 
     private boolean isMethodStatic;
+    private String className;
 
     @Override
     protected void buildVisitor() {
+        addVisit(Kind.CLASS_DECL, this::visitClassDecl);
         addVisit(Kind.METHOD_DECL, this::visitMethodDeclaration);
         addVisit(Kind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
     }
+
+    private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
+        className = classDecl.get("name");
+        return null;
+    }
+
 
     // Prevents varargs from being declared as any argument other than the last
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
@@ -68,6 +76,10 @@ public class Method extends AnalysisVisitor {
 
         // Check if the super class of the variable is imported, return
         if (table.getImports().stream().anyMatch(methodName -> methodName.equals(table.getSuper()))) {
+            return null;
+        }
+
+        if (varType.getName().equals(className)) {
             return null;
         }
 
