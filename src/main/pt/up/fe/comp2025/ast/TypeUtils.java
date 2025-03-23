@@ -53,6 +53,7 @@ public class TypeUtils {
             case BOOLEAN_LITERAL -> new Type("boolean", false);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case THIS_EXPR -> new Type("this", false);
+            case INDEX_ACCESS_EXPR -> new Type(Kind.INDEX_ACCESS_EXPR.toString(),true) ;
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 

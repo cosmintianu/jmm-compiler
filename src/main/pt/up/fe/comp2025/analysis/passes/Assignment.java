@@ -39,7 +39,7 @@ public class Assignment extends AnalysisVisitor {
         Type rightType = typeUtils.getExprType(assignStmt.getChild(1));
 
         // If the types are not compatible, report an error
-        if (!isTypeCompatible(rightType, leftType, table)) {
+        if (!isTypeCompatible(rightType, leftType, table, typeUtils)) {
             var message = String.format(
                     "Assignment expression has on the left type %s and right type %s",
                     leftType, rightType
@@ -50,7 +50,7 @@ public class Assignment extends AnalysisVisitor {
         return null;
     }
 
-    public static boolean isTypeCompatible(Type rightType, Type leftType, SymbolTable table) {
+    public static boolean isTypeCompatible(Type rightType, Type leftType, SymbolTable table, TypeUtils typeUtils) {
 
         // Rule -> if a class is being imported, assume the types of the expression where it is used are correct
         if (table.getImports().contains(leftType.getName()) && table.getImports().contains(rightType.getName()))
@@ -62,6 +62,11 @@ public class Assignment extends AnalysisVisitor {
         // Rule -> If the class extends another class, assume the method exists in one of the super classes
         if (rightType.getName().equals(table.getClassName()) && leftType.getName().equals(table.getSuper()))
             return true;
+
+        // Check if first is IndexAccessExpr is compatible with right type
+        if (leftType.getName().equals(Kind.INDEX_ACCESS_EXPR.toString()) && rightType.getName().equals("int")) {
+            return true;
+        }
 
         return false;
     }
