@@ -26,7 +26,6 @@ public class Method extends AnalysisVisitor {
         return null;
     }
 
-
     // Prevents varargs from being declared as any argument other than the last
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
@@ -54,18 +53,16 @@ public class Method extends AnalysisVisitor {
 
         JmmNode varRefExpr = methodCallExpr.getChild(0);
 
-//        System.out.println(table.getSuper());
-        Type varType = typeUtils.getExprType(varRefExpr);
-
-//        System.out.println("varRefExpr type: " + varType);
-
-        // Check if class is not static "this" can be used, return
-        if (!isMethodStatic && varType.getName().equals("this")) {
+        // Check if the println method is called from io class, supposed static, return
+        // Check before varType assignment because getExprType returns null, the io class is imported, cant get type
+        if (varRefExpr.get("name").equals("io") && methodCallExpr.get("name").equals("println")) {
             return null;
         }
 
-        // Check if the println method is called from io class, supposed static, return
-        if (varRefExpr.get("name").equals("io") && methodCallExpr.get("name").equals("println")) {
+        Type varType = typeUtils.getExprType(varRefExpr);
+
+        // Check if class is not static, "this" can be used, return
+        if (!isMethodStatic && varType.getName().equals("this")) {
             return null;
         }
 
@@ -79,13 +76,21 @@ public class Method extends AnalysisVisitor {
             return null;
         }
 
+        // Boolean that allows one the correct report to be added
+        boolean printMethodNotDeclaredReport = false;
+
+        // Check if the variable is the same type as the class
         if (varType.getName().equals(className)) {
-            return null;
+            if (table.getMethods().stream().anyMatch(methodName -> methodName.equals(methodCallExpr.get("name")))) {
+                return null;
+            }
+            printMethodNotDeclaredReport = true;
+            addNewErrorReport(methodCallExpr, "Method " + methodCallExpr.get("name") + " isn't declared in this class.");
         }
 
-
-        addNewErrorReport(methodCallExpr, "Class/Super class of " + varType.getName() + " is not imported.");
+        if (!printMethodNotDeclaredReport) {
+            addNewErrorReport(methodCallExpr, "Variable " + varType.getName() + " on which a method is called is not declared.");
+        }
         return null;
     }
-
 }

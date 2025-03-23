@@ -113,6 +113,6 @@ expr
     | value=TRUE #BooleanLiteral
     | value=FALSE #BooleanLiteral
     | name=ID #VarRefExpr
-    | THIS #ThisExpr
+    | name=THIS #ThisExpr
     ;
 
