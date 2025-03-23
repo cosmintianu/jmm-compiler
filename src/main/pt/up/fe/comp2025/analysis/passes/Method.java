@@ -7,12 +7,18 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Method extends AnalysisVisitor {
 
     private boolean isMethodStatic;
     private String className;
+    // Map to hold the parameters types for all methods
+    private Map<String, List<Type>> methodParamsMap = new HashMap<>();
+
 
     @Override
     protected void buildVisitor() {
@@ -26,12 +32,27 @@ public class Method extends AnalysisVisitor {
         return null;
     }
 
-    // Prevents varargs from being declared as any argument other than the last
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
+        TypeUtils typeUtils = new TypeUtils(table);
+
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
+
+        String methodName = method.get("nameMethod");
+
+//        System.out.println("The method: " + methodName);
 
         List<JmmNode> parameters = method.getChildren(Kind.PARAM);
 
+        List<Type> paramTypes = new ArrayList<>();
+
+        for (JmmNode param : parameters) {
+            paramTypes.add(typeUtils.getExprType(param));
+        }
+
+        // Add for each method the list with their parameter types in the map
+        methodParamsMap.put(methodName, paramTypes);
+
+        // Prevents varargs from being declared as any argument other than the last
         for (int i = 0; i < parameters.size(); i++) {
 
             var param = parameters.get(i).get("nameType");
@@ -42,6 +63,7 @@ public class Method extends AnalysisVisitor {
                 addNewErrorReport(parameters.get(i), message);
             }
         }
+
 
         return null;
     }
@@ -82,11 +104,40 @@ public class Method extends AnalysisVisitor {
         // Check if the variable is the same type as the class
         if (varType.getName().equals(className)) {
             if (table.getMethods().stream().anyMatch(methodName -> methodName.equals(methodCallExpr.get("name")))) {
+
+                List<JmmNode> args = methodCallExpr.getChildren();
+
+                // Remove the class variable on which the method is called
+                // so we only have the arguments
+                args.removeFirst();
+
+                List<Type> argTypes = new ArrayList<>();
+
+                for (JmmNode arg : args) {
+                    argTypes.add(typeUtils.getExprType(arg));
+                }
+                // Find the parameters of the called method
+                List<Type> actualParamTypes = methodParamsMap.get(methodCallExpr.get("name"));
+
+                if (actualParamTypes != null) {
+                    // Check compatibility
+                    for (int i = 0; i < actualParamTypes.size(); i++) {
+                        if (!actualParamTypes.get(i).equals(argTypes.get(i))) {
+                            addNewErrorReport(methodCallExpr, "Argument on position "
+                                    + i + " of type: " + argTypes.get(i) + " doesn't match parameter of type "
+                                    + actualParamTypes.get(i) + " in method declaration.");
+                        }
+                    }
+                }
+
                 return null;
             }
             printMethodNotDeclaredReport = true;
             addNewErrorReport(methodCallExpr, "Method " + methodCallExpr.get("name") + " isn't declared in this class.");
         }
+
+//        JmmNode methodParam = methodCallExpr.getChild(1);
+//        System.out.println("DAaaaaaaaaaaaaa " + methodParam);
 
         if (!printMethodNotDeclaredReport) {
             addNewErrorReport(methodCallExpr, "Variable " + varType.getName() + " on which a method is called is not declared.");

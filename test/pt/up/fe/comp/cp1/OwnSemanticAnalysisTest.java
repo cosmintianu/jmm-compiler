@@ -106,4 +106,10 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void CompatibleArguments() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/CompatibleArguments.jmm"));
+        TestUtils.noErrors(result);
+    }
+
 }

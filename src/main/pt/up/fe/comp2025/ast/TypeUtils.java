@@ -48,12 +48,16 @@ public class TypeUtils {
             case METHOD_CALL_EXPR -> getMethodExprType(expr);
             //case UNARY_EXPR, PAREN_EXPR
             case NEW_ARRAY_EXPR, ARRAY_LITERAL, LENGTH_EXPR -> new Type("int", true);
-            case NEW_OBJECT_EXPR -> new Type(expr.get("name"), false);
+            case NEW_OBJECT_EXPR, CLASS_TYPE -> new Type(expr.get("name"), false);
             case INTEGER_LITERAL -> new Type("int", false);
             case BOOLEAN_LITERAL -> new Type("boolean", false);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case THIS_EXPR -> new Type("this", false);
-            case INDEX_ACCESS_EXPR -> new Type(Kind.INDEX_ACCESS_EXPR.toString(),true) ;
+            case INDEX_ACCESS_EXPR -> new Type(Kind.INDEX_ACCESS_EXPR.toString(), true);
+            case PARAM -> getExprType(expr.getChild(0));
+            case INT_TYPE -> new Type("int", Boolean.parseBoolean(expr.get("isArray")));
+            case BOOLEAN_TYPE -> new Type("boolean", Boolean.parseBoolean(expr.get("isArray")));
+            case VARARGS_TYPE -> new Type("int", true); // Maybe need to check this
             default -> throw new UnsupportedOperationException("Unknown Kind" + Kind.fromString(expr.getKind()) + "'");
         };
 
