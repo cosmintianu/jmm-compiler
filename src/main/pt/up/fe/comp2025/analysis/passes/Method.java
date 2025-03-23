@@ -19,13 +19,14 @@ public class Method extends AnalysisVisitor {
     private String className;
     // Map to hold the parameters types for all methods
     private Map<String, List<Type>> methodParamsMap = new HashMap<>();
-
+    private String currentMethodName;
 
     @Override
     protected void buildVisitor() {
         addVisit(Kind.CLASS_DECL, this::visitClassDecl);
         addVisit(Kind.METHOD_DECL, this::visitMethodDeclaration);
         addVisit(Kind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
+        addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
     }
 
     private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
@@ -33,11 +34,36 @@ public class Method extends AnalysisVisitor {
         return null;
     }
 
+    private Void visitReturnStmt(JmmNode returnStmt, SymbolTable table) {
+        JmmNode expr = returnStmt.getChild(0);
+
+        Type expectedRetType = table.getReturnType(currentMethodName);
+        Type actualRetType = new TypeUtils(table).getExprType(expr);
+
+
+        System.out.println("Cur method ret type : " + expectedRetType);
+        System.out.println(actualRetType);
+
+        // Check if the expected ret type and the actual ret type match
+        if (expectedRetType.equals(actualRetType)) {
+            return null;
+        }
+
+        // If actual ret type is null => method belongs to
+        // an imported class, return
+        if (actualRetType == null) {
+            return null;
+        }
+
+        addNewErrorReport(returnStmt, "Return Type Mismatch. Expected: " + expectedRetType + " Actual: " + actualRetType);
+        return null;
+    }
+
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
 
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
 
-        String methodName = method.get("nameMethod");
+        currentMethodName = method.get("nameMethod");
 
 //        System.out.println("The method: " + methodName);
 
@@ -45,13 +71,13 @@ public class Method extends AnalysisVisitor {
 
         List<Type> paramTypes = new ArrayList<>();
 
-        for (Symbol param : table.getParameters(methodName)) {
+        for (Symbol param : table.getParameters(currentMethodName)) {
             //System.out.println("param: " + param);
             paramTypes.add(param.getType());
         }
 
         // Add for each method the list with their parameter types in the map
-        methodParamsMap.put(methodName, paramTypes);
+        methodParamsMap.put(currentMethodName, paramTypes);
 
         // Prevents varargs from being declared as any argument other than the last
         for (int i = 0; i < parameters.size(); i++) {
@@ -131,14 +157,20 @@ public class Method extends AnalysisVisitor {
                     }
                 }
 
+//                if(!table.getReturnType(currentMethodName).equals(table.getReturnType(methodCallExpr.get("name")))) {
+//                    addNewErrorReport(methodCallExpr, "The c");
+//                }
+//
+//                System.out.println(currentMethodName);
+//                System.out.println(table.getReturnType(currentMethodName));
+//                System.out.println(table.getReturnType(methodCallExpr.get("name")));
+
                 return null;
             }
             printMethodNotDeclaredReport = true;
             addNewErrorReport(methodCallExpr, "Method " + methodCallExpr.get("name") + " isn't declared in this class.");
         }
 
-//        JmmNode methodParam = methodCallExpr.getChild(1);
-//        System.out.println("DAaaaaaaaaaaaaa " + methodParam);
 
         if (!printMethodNotDeclaredReport) {
             addNewErrorReport(methodCallExpr, "Variable '" + varType.getName() + "' on which a method is called is not declared.");

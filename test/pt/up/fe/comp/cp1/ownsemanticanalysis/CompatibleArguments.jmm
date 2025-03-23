@@ -4,11 +4,11 @@ class IncompatibleArguments {
 
     }
 
-    public int foo(boolean a) {
+    public boolean foo(boolean a) {
         return a ;
     }
 
-    public int bar() {
+    public boolean bar() {
         IncompatibleArguments a;
         boolean b;
 
