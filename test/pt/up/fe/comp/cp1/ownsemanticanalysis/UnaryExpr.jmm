@@ -1,0 +1,12 @@
+import io;
+
+class UnaryTest {
+
+    public static void main(String[] args) {
+        boolean result;
+
+        result = !true;
+
+        io.println(result);
+    }
+}

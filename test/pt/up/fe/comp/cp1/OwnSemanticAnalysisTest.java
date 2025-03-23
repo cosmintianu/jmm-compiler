@@ -151,6 +151,19 @@ public class OwnSemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void WrongReturnType() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongReturnType.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    @Test
+    public void UnaryExpression() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/UnaryExpr.jmm"));
+        TestUtils.noErrors(result);
+    }
+
     //Still need to be fixed!
 
     @Test
@@ -161,17 +174,11 @@ public class OwnSemanticAnalysisTest {
     }
 
     @Test
-    public void WrongReturnType() {
-        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongReturnType.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
     public void AssignValueToInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/AssignValueToInt.jmm"));
         TestUtils.noErrors(result);
     }
+
 
 
 }
