@@ -79,7 +79,8 @@ public class OwnSemanticAnalysisTest {
     @Test
     public void ReturnArray() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ReturnArray.jmm"));
-        TestUtils.noErrors(result);
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test

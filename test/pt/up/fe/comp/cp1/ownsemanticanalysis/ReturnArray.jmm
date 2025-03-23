@@ -1,10 +1,8 @@
-import io;
-
 class ReturnArray {
 
     public static void main(String[] args) {
-
-        // this.createArray is incorrect
+        int[] arr;
+        arr = this.createArray();
     }
 
     public int[] createArray() {
