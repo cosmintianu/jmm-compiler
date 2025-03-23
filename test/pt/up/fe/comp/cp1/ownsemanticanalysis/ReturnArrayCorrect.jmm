@@ -1,0 +1,18 @@
+class ReturnArrayCorrect {
+
+    public static void main(String[] args) {
+        int[] arr;
+        ReturnArrayCorrect obj;
+        obj = new ReturnArrayCorrect();
+        arr = obj.createArray();
+
+    }
+
+    public int[] createArray() {
+        int[] newArray;
+        newArray = new int[2];
+        newArray[0] = 10;
+        newArray[1] = 20;
+        return newArray;
+    }
+}
