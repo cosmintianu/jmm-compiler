@@ -157,14 +157,6 @@ public class Method extends AnalysisVisitor {
                     }
                 }
 
-//                if(!table.getReturnType(currentMethodName).equals(table.getReturnType(methodCallExpr.get("name")))) {
-//                    addNewErrorReport(methodCallExpr, "The c");
-//                }
-//
-//                System.out.println(currentMethodName);
-//                System.out.println(table.getReturnType(currentMethodName));
-//                System.out.println(table.getReturnType(methodCallExpr.get("name")));
-
                 return null;
             }
             printMethodNotDeclaredReport = true;
