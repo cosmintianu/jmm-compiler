@@ -78,20 +78,23 @@ public class TypeUtils {
 
     private Type getVarRefExprType(JmmNode varRefExpr) {
 
-        if (varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty())
+        if (varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty()) {
             return null;
+        }
 
         String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
         String varName = varRefExpr.get("name");
 
         for (Symbol field : table.getFields()) {
-            if (field.getName().equals(varName))
+            if (field.getName().equals(varName)) {
                 return field.getType();
+            }
         }
 
         for (Symbol param : table.getParameters(methodName)) {
-            if (param.getName().equals(varName))
+            if (param.getName().equals(varName)) {
                 return param.getType();
+            }
         }
 
         for (Symbol localVar : table.getLocalVariables(methodName)) {

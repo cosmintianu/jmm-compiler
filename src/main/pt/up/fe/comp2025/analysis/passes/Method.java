@@ -47,10 +47,19 @@ public class Method extends AnalysisVisitor {
         JmmNode varRefExpr = methodCallExpr.getChild(0);
 
 //        System.out.println(table.getSuper());
-
         Type varType = typeUtils.getExprType(varRefExpr);
 
 //        System.out.println("varRefExpr type: " + varType);
+
+        // Check if class is not static "this" can be used, return
+        if (!isMethodStatic && varType.getName().equals("this")) {
+            return null;
+        }
+
+        // Check if the println method is called from io class, supposed static, return
+        if (varRefExpr.get("name").equals("io") && methodCallExpr.get("name").equals("println")) {
+            return null;
+        }
 
         // Check if the class of the variable is imported, return
         if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varType.getName()))) {
@@ -62,10 +71,6 @@ public class Method extends AnalysisVisitor {
             return null;
         }
 
-        // Check if class is not static "this" can be used, return
-        if (!isMethodStatic && varType.getName().equals("this")) {
-            return null;
-        }
 
         addNewErrorReport(methodCallExpr, "Class/Super class of " + varType.getName() + " is not imported.");
         return null;
