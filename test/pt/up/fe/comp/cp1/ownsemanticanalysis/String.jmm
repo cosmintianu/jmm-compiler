@@ -1,0 +1,13 @@
+class StringTest {
+    String value;
+
+    public int setValue(String newValue) {
+        value = newValue;
+        return 0;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+}

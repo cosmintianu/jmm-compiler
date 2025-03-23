@@ -81,7 +81,7 @@ public class TypeUtils {
         };
     }
 
-    private Type getVarRefExprType(JmmNode varRefExpr) {
+    public Type getVarRefExprType(JmmNode varRefExpr) {
 
         if (varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty()) {
             return null;

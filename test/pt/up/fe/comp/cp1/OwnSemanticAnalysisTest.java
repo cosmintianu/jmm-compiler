@@ -119,4 +119,16 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void WhileLoop2() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WhileLoop2.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void String() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/String.jmm"));
+        TestUtils.noErrors(result);
+    }
+
 }

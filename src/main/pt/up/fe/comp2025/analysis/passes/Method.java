@@ -1,5 +1,6 @@
 package pt.up.fe.comp2025.analysis.passes;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -33,7 +34,6 @@ public class Method extends AnalysisVisitor {
     }
 
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
-        TypeUtils typeUtils = new TypeUtils(table);
 
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
 
@@ -45,8 +45,9 @@ public class Method extends AnalysisVisitor {
 
         List<Type> paramTypes = new ArrayList<>();
 
-        for (JmmNode param : parameters) {
-            paramTypes.add(typeUtils.getExprType(param));
+        for (Symbol param : table.getParameters(methodName)) {
+            //System.out.println("param: " + param);
+            paramTypes.add(param.getType());
         }
 
         // Add for each method the list with their parameter types in the map
