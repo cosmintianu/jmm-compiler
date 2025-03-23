@@ -1,0 +1,11 @@
+class Test {
+    public static int countEvenNumbers(int n) {
+
+        int[] arr;
+        arr = new int[5];
+        while (arr[3]) {
+        }
+
+        return n;
+    }
+}

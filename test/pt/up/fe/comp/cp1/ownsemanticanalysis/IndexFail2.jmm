@@ -1,0 +1,12 @@
+class IndexFail {
+
+    // Index is out of bounds
+    public boolean badIndex2() {
+        int[] arr;
+        arr = new int[5];
+        arr[7] = 10;
+
+        return true;
+    }
+
+}

@@ -1,0 +1,13 @@
+class IndexFail {
+
+
+    public int wrongIndex() {
+        int b;
+        int[] arr;
+        arr = new int[5];
+        b = arr[2];
+
+        return b;
+    }
+
+}
