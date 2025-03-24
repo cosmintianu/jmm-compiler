@@ -6,18 +6,37 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Array extends AnalysisVisitor {
+
+    private Map<String, Integer> arrayCapacities = new HashMap<>();
 
     @Override
     protected void buildVisitor() {
+        addVisit(Kind.ARRAY_INIT_STMT, this::visitArrayInitStmt);
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
         addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
+    }
+
+    // Store the capacity of arrays when initialised
+    private Void visitArrayInitStmt(JmmNode arrayInitStmt, SymbolTable symbolTable) {
+        JmmNode capacity = arrayInitStmt.getChild(1);
+
+        String arrayName = arrayInitStmt.get("name");
+        // Store the capacities of all initialised arrays
+        arrayCapacities.put(arrayName, Integer.valueOf(capacity.get("value")));
+
+//        System.out.println(arrayCapacities);
+
+        return null;
     }
 
     // Prevents trying to access an array through an invalid variable
     private Void visitIndexAccessExpr(JmmNode array, SymbolTable table) {
 
-        //I rewrote ArrayIndexNotIntPass & ArrayAccesOnInt here! @cosmin Thank you @Amanda
+        //I rewrote ArrayIndexNotIntPass & ArrayAccessOnInt here! @cosmin Thank you, @Amanda
         TypeUtils typeUtils = new TypeUtils(table);
 
         JmmNode child_1 = array.getChild(1);
@@ -34,6 +53,21 @@ public class Array extends AnalysisVisitor {
             addNewErrorReport(child_0, message);
         }
 
+        // Checks error for out of bounds index
+        if (child_1.getKind().equals(Kind.INTEGER_LITERAL.toString())) {
+            var actualCapacity = arrayCapacities.get(child_0.get("name"));
+            if (actualCapacity == null) {
+                return null;
+            }
+
+            int indexAccessed = Integer.parseInt(child_1.get("value"));
+
+            if (indexAccessed > actualCapacity - 1) {
+                addNewErrorReport(array, "Array has the capacity of  " + actualCapacity +
+                        " while " + indexAccessed + " is trying to be accessed.");
+                return null;
+            }
+        }
         return null;
     }
 

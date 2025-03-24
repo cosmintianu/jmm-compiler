@@ -90,8 +90,9 @@ stmt
     | IF '(' expr ')' stmt ELSE stmt #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
     | expr ';' #ExprStmt
+    | name=ID '=' NEW type '[' capacity=expr ']' ';' #ArrayInitStmt // Give priority to the specific grammar
+    | name=ID '[' ']' '=' expr ';' #ArrayAssignStmt
     | expr '=' expr ';' #VarAssignStmt
-    | name=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     //| '=' expr ';' #AssignStmt //
     | RETURN expr ';' #ReturnStmt //
     ;

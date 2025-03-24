@@ -41,8 +41,8 @@ public class Method extends AnalysisVisitor {
         Type actualRetType = new TypeUtils(table).getExprType(expr);
 
 
-        System.out.println("Cur method ret type : " + expectedRetType);
-        System.out.println(actualRetType);
+//        System.out.println("Cur method ret type : " + expectedRetType);
+//        System.out.println(actualRetType);
 
         // Check if the expected ret type and the actual ret type match
         if (expectedRetType.equals(actualRetType)) {

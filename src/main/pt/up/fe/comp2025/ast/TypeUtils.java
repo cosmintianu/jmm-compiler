@@ -53,7 +53,7 @@ public class TypeUtils {
             case BOOLEAN_LITERAL -> new Type("boolean", false);
             case VAR_REF_EXPR -> getVarRefExprType(expr);
             case THIS_EXPR -> new Type("this", false);
-            case INDEX_ACCESS_EXPR -> new Type(Kind.INDEX_ACCESS_EXPR.toString(), true);
+            case INDEX_ACCESS_EXPR -> new Type("int", false); // It is int for now
             case PARAM -> getExprType(expr.getChild(0));
             case INT_TYPE -> new Type("int", Boolean.parseBoolean(expr.get("isArray")));
             case BOOLEAN_TYPE -> new Type("boolean", Boolean.parseBoolean(expr.get("isArray")));

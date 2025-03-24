@@ -37,6 +37,7 @@ public enum Kind {
     EXPR_STMT,
     VAR_ASSIGN_STMT,
     ARRAY_ASSIGN_STMT,
+    ARRAY_INIT_STMT,
 
 
     BINARY_EXPR,
