@@ -1,0 +1,11 @@
+class InvalidLoopTest {
+    public static void main(String[] args) {
+
+        boolean isValid;
+        isValid=true;
+
+        while (10) {
+            isValid=false;
+        }
+    }
+}

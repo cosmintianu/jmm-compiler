@@ -164,8 +164,6 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    //Still need to be fixed!
-
     @Test
     public void IndexFail2() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/IndexFail2.jmm"));
@@ -179,6 +177,24 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void WrongIf() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongIf.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
 
+    @Test
+    public void WrongLoop() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongLoop.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    @Test
+    public void WhileAndIf() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WhileAndIf.jmm"));
+        TestUtils.noErrors(result);
+    }
 
 }

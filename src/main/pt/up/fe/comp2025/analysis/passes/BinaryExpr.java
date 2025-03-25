@@ -31,7 +31,7 @@ public class BinaryExpr extends AnalysisVisitor {
 //        System.out.println("expr type: " + rightOperandType);
 
         // Check int operations
-        if (opType.getName().equals("int") || binaryExpr.get("op").equals("<")) {
+        if (opType.getName().equals("int") || binaryExpr.get("op").equals("<") || binaryExpr.get("op").equals(">")) {
             if (leftOperandType.getName().equals("int") && rightOperandType.getName().equals("int")
                     && leftOperandType.isArray() == rightOperandType.isArray()) {
                 return null;
@@ -39,7 +39,7 @@ public class BinaryExpr extends AnalysisVisitor {
         }
 
         // Check boolean operations
-        if (opType.getName().equals("boolean") && !binaryExpr.get("op").equals("<")) {
+        if (opType.getName().equals("boolean") && (!binaryExpr.get("op").equals("<") || !binaryExpr.get("op").equals(">"))) {
             if (leftOperandType.getName().equals("boolean") && rightOperandType.getName().equals("boolean")) {
                 return null;
             }

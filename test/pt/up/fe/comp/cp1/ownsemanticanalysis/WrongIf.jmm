@@ -1,0 +1,13 @@
+class Test {
+
+    public static void main(String[] args) {
+
+        boolean isValid;
+        isValid=true;
+
+         // There is no Else and the If condition is not a boolean
+        if (5) {
+            isValid=false;
+        }
+    }
+}

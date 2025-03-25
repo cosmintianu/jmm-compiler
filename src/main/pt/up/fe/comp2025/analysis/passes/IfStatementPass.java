@@ -16,7 +16,7 @@ public class IfStatementPass extends AnalysisVisitor {
     private Void visitIfStmt(JmmNode ifStmt, SymbolTable symbolTable) {
         JmmNode child = ifStmt.getChild(0);
 
-        if ("&&<".contains(child.get("op"))) {
+        if ("&&<>".contains(child.get("op"))) {
             return null;
         }
 

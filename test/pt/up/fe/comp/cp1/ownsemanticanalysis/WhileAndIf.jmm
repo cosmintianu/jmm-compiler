@@ -1,0 +1,32 @@
+class Test {
+
+    public static void main(String[] args) {
+
+    /*
+        sgsfgsgs€~€~¬ç
+    */
+
+        int x;
+        x = 10;
+
+        if (x > 5) {
+            if (x > 6) {
+                x = 6;
+            }
+            else {
+                x = 5;
+            }
+        }
+        else {
+            x = 4;
+        }
+
+        while (x > 3) {
+            while (x > 2) {
+                x = x - 1;
+            }
+            x = x - 1;
+        }
+
+    }
+}

@@ -81,7 +81,7 @@ public class TypeUtils {
 
         return switch (binaryExpr.get("op")) {
             case "+", "*", "-", "/" -> new Type("int", false);
-            case "&&", "||", "<", "!" -> new Type("boolean", false);
+            case "&&", "||", "<", "!", ">" -> new Type("boolean", false);
             default -> throw new RuntimeException("Unknown operator '" + binaryExpr.get("op"));
         };
     }

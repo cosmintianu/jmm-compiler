@@ -11,7 +11,7 @@ CLASS : 'class' ;
 INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
-EXTENDS : 'extends' ;
+EXTENDS : 'extends';
 
 STATIC : 'static';
 VOID :'void';
@@ -32,7 +32,8 @@ STRING: 'String';
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
-LINE_COMMENT: '//' ~[\r\n]* -> skip;
+LINE_COMMENT: '//' ~[\r\n]+ -> skip;
+MULTI_LINE_COMMENT : '/*' .*? '*/' -> skip;
 
 /* ###############################################
  ############################################### */
@@ -93,7 +94,6 @@ stmt
     | name=ID '=' NEW type '[' capacity=expr ']' ';' #ArrayInitStmt // Give priority to the specific grammar
     | name=ID '[' ']' '=' expr ';' #ArrayAssignStmt
     | expr '=' expr ';' #VarAssignStmt
-    //| '=' expr ';' #AssignStmt //
     | RETURN expr ';' #ReturnStmt //
     ;
 
@@ -108,7 +108,7 @@ expr
     | expr op=( '*' | '/' ) expr #BinaryExpr
     | expr op=( '+' | '-') expr #BinaryExpr
     | '!' expr #UnaryExpr
-    | expr op='<' expr #BinaryExpr
+    | expr op=('<' | '>') expr #BinaryExpr
     | expr op=('&&' | '||') expr #BinaryExpr
     | value=INTEGER #IntegerLiteral
     | name=TRUE #BooleanLiteral
