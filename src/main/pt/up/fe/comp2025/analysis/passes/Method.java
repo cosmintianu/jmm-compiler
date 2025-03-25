@@ -116,7 +116,7 @@ public class Method extends AnalysisVisitor {
         }
 
         // Check if the class of the variable is imported, return
-        if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varType.getName()))) {
+        if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varRefExpr.get("name")))) {
             return null;
         }
 

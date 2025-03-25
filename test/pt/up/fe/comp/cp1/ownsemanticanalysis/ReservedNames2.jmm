@@ -1,0 +1,7 @@
+class ReservedNames {
+    public static void main(String[] args) {
+        int extends;
+
+        extends = 5;
+    }
+}

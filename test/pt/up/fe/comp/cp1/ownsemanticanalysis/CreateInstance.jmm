@@ -1,0 +1,14 @@
+class Test {
+
+    public Test createInstance() {
+        return this;
+    }
+
+    public static void main(String[] args) {
+
+        Test testinho;
+        testinho = new Test();
+
+        testinho = testinho.createInstance();
+    }
+}
