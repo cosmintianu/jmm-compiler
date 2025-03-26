@@ -55,6 +55,11 @@ public class Method extends AnalysisVisitor {
             return null;
         }
 
+        // If the expected return is a class (Uppercase first char) and the return type is this, return
+        if (Character.isUpperCase(expectedRetType.getName().charAt(0)) && actualRetType.getName().equals("this")) {
+            return null;
+        }
+
         addNewErrorReport(returnStmt, "Return Type Mismatch. Expected: " + expectedRetType + " Actual: " + actualRetType);
         return null;
     }
@@ -115,8 +120,8 @@ public class Method extends AnalysisVisitor {
             return null;
         }
 
-        // Check if the class of the variable is imported, return
-        if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varRefExpr.get("name")))) {
+        // Check if the class of the variable is imported, return // This is correct :)
+        if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varType.getName()))) {
             return null;
         }
 
