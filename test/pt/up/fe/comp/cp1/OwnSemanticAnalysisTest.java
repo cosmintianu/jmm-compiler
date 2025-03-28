@@ -224,6 +224,14 @@ public class OwnSemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void duplicateDeclarations() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/DuplicateDeclaration.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+
+    }
 
 
 }
