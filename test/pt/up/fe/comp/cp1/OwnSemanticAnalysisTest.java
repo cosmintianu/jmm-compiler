@@ -211,11 +211,11 @@ public class OwnSemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-//    @Test
-//    public void MethodImport() { // This is a static method import, will do this later
-//        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/MethodImport.jmm"));
-//        TestUtils.noErrors(result);
-//    }
+    @Test
+    public void MethodImport() { // This is a static method import, will do this later
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/MethodImport.jmm"));
+        TestUtils.noErrors(result);
+    }
 
     //Not sure If it should pass or not :c What do you think?
     @Test
@@ -223,7 +223,6 @@ public class OwnSemanticAnalysisTest {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/CreateInstance.jmm"));
         TestUtils.noErrors(result);
     }
-
 
 
 }
