@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class VariableDeclaration extends AnalysisVisitor {
 
-    private String currentMethod;
+    private JmmNode currentMethod;
     private List<JmmNode> var_decl;
 
 
@@ -22,22 +22,24 @@ public class VariableDeclaration extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("nameMethod");
-
-        var_decl = method.getChildren(Kind.VAR_DECL);
-
+        currentMethod = method;
         return null;
     }
 
     private Void visitVarDecl(JmmNode varDecl, SymbolTable table) {
 
-        Set<String> duplicates = new HashSet<>();
+        if (currentMethod != null) {
 
-        for (var element : var_decl) {
+            var_decl = currentMethod.getChildren(Kind.VAR_DECL);
+            Set<String> duplicates = new HashSet<>();
 
-            if(!duplicates.add(element.get("name"))){
-                addNewErrorReport(varDecl, "Variable '" + varDecl.get("name") + "' was defined multiple times.");
+            for (var element : var_decl) {
+
+                if(!duplicates.add(element.get("name"))){
+                    addNewErrorReport(varDecl, "Variable '" + varDecl.get("name") + "' was defined multiple times.");
+                }
             }
+
         }
 
         return null;
