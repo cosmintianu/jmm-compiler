@@ -38,6 +38,14 @@ public class Assignment extends AnalysisVisitor {
         Type leftType = typeUtils.getExprType(assignStmt.getChild(0));
         Type rightType = typeUtils.getExprType(assignStmt.getChild(1));
 
+        if (rightType.getName().equals("this")) {
+            rightType = new Type(table.getClassName(), false);
+        }
+
+        if (leftType.getName().equals("this")) {
+            leftType = new Type(table.getClassName(), false);
+        }
+
         // If the types are not compatible, report an error
         if (!isTypeCompatible(rightType, leftType, table, typeUtils)) {
             var message = String.format(
@@ -67,6 +75,7 @@ public class Assignment extends AnalysisVisitor {
         if (leftType.getName().equals(Kind.INDEX_ACCESS_EXPR.toString()) && rightType.getName().equals("int")) {
             return true;
         }
+
 
         return false;
     }

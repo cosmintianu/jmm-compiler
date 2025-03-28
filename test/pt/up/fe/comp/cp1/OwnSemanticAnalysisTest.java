@@ -212,7 +212,7 @@ public class OwnSemanticAnalysisTest {
     }
 
     @Test
-    public void MethodImport() { // This is a static method import, will do this later
+    public void MethodImport() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/MethodImport.jmm"));
         TestUtils.noErrors(result);
     }
@@ -231,6 +231,25 @@ public class OwnSemanticAnalysisTest {
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
 
+    }
+
+    @Test
+    public void ThisAssignment() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ThisAssignment.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ThisAssignmentExtends() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ThisAssignmentExtends.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void ThisInStaticMethod() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/ThisInStaticMethod.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
 }

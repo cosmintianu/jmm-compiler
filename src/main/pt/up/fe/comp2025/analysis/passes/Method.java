@@ -27,6 +27,16 @@ public class Method extends AnalysisVisitor {
         addVisit(Kind.METHOD_DECL, this::visitMethodDeclaration);
         addVisit(Kind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+        addVisit(Kind.THIS_EXPR, this::visitThisExpr);
+    }
+
+    private Void visitThisExpr(JmmNode thisExpr, SymbolTable table) {
+
+        if (isMethodStatic) {
+            addNewErrorReport(thisExpr, "This called in a static method.");
+        }
+
+        return null;
     }
 
     private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
@@ -120,8 +130,7 @@ public class Method extends AnalysisVisitor {
             return null;
         }
 
-
-        System.out.println(varRefExpr);
+//        System.out.println(varRefExpr);
 
         Type varType = typeUtils.getExprType(varRefExpr);
 
