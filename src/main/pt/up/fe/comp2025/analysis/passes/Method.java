@@ -70,7 +70,7 @@ public class Method extends AnalysisVisitor {
 
         currentMethodName = method.get("nameMethod");
 
-//        System.out.println("The method: " + methodName);
+//        System.out.println("The method: " + currentMethodName);
 
         List<JmmNode> parameters = method.getChildren(Kind.PARAM);
 
