@@ -28,7 +28,6 @@ public enum Kind {
     STRING_TYPE,
     METHOD_DECL,
     PARAM,
-    ASSIGN_STMT,
     RETURN_STMT,
     BRACKET_STMT,
     IF_STMT,
