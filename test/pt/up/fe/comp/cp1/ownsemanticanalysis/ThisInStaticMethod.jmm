@@ -1,0 +1,12 @@
+class ThisInStaticMethod {
+
+    public static void main(String[] args) {
+
+    }
+
+    static ThisInStaticMethod setA() {
+
+        return this;
+    }
+
+}

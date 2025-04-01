@@ -27,6 +27,16 @@ public class Method extends AnalysisVisitor {
         addVisit(Kind.METHOD_DECL, this::visitMethodDeclaration);
         addVisit(Kind.METHOD_CALL_EXPR, this::visitMethodCallExpr);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+        addVisit(Kind.THIS_EXPR, this::visitThisExpr);
+    }
+
+    private Void visitThisExpr(JmmNode thisExpr, SymbolTable table) {
+
+        if (isMethodStatic) {
+            addNewErrorReport(thisExpr, "This called in a static method.");
+        }
+
+        return null;
     }
 
     private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
@@ -109,9 +119,18 @@ public class Method extends AnalysisVisitor {
 
         // Check if the println method is called from io class, supposed static, return
         // Check before varType assignment because getExprType returns null, the io class is imported, cant get type
-        if (varRefExpr.get("name").equals("io") && methodCallExpr.get("name").equals("println")) {
+//        if (varRefExpr.get("name").equals("io") && methodCallExpr.get("name").equals("println")) {
+//            return null;
+//        }
+
+        // If static class is imported, assume correct return
+        if (table.getImports().stream()
+                .map(importName -> importName.substring(importName.lastIndexOf('.') + 1))
+                .anyMatch(methodName -> methodName.equals(varRefExpr.get("name")))) {
             return null;
         }
+
+//        System.out.println(varRefExpr);
 
         Type varType = typeUtils.getExprType(varRefExpr);
 
@@ -121,6 +140,7 @@ public class Method extends AnalysisVisitor {
         }
 
         // Check if the class of the variable is imported, return // This is correct :)
+        // For initialised instances of imported classes
         if (table.getImports().stream().anyMatch(methodName -> methodName.equals(varType.getName()))) {
             return null;
         }
