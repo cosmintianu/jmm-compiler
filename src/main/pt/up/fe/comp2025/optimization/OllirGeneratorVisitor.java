@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
 import java.util.stream.Collectors;
@@ -48,10 +49,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(VAR_ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(IMPORT_DECL, this::visitImport);
+        addVisit(VAR_DECL, this::visitVarDecl);
 
 //        setDefaultVisit(this::defaultVisit);
     }
 
+    private String visitVarDecl(JmmNode node,Void unused) {
+        var typeCode = ollirTypes.toOllirType(node.getChild(0));
+        var id = node.get("name");
+
+        String code = id + typeCode;
+
+        return code;
+    }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
@@ -67,8 +78,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var left = node.getChild(0);
         Type thisType = types.getExprType(left);
         String typeString = ollirTypes.toOllirType(thisType);
-        var varCode = left.get("name") + typeString;
-
+        var varCode = thisType.get("name") + typeString; //in our case we have 'expr' as the left argument, instead of name=id
 
         code.append(varCode);
         code.append(SPACE);
@@ -125,19 +135,31 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = node.getBoolean("isPublic", false);
+        boolean isStatic = node.getBoolean("isStatic", false);
 
         if (isPublic) {
             code.append("public ");
         }
 
+        if (isStatic) {
+            code.append("static ");
+        }
+
         // name
-        var name = node.get("name");
+        var name = node.get("nameMethod");
         code.append(name);
 
         // params
-        // TODO: Hardcoded for a single parameter, needs to be expanded
-        var paramsCode = visit(node.getChild(1));
-        code.append("(" + paramsCode + ")");
+        // TODO: Poor implemented, still need to be fixed
+        if (node.getNumChildren() > 0){
+            code.append("(");
+            for (var param : node.getChildren()) {
+                var child = TypeUtils.convertType(param);
+                String ollirChildType = ollirTypes.toOllirType(child);
+                code.append(child.getName() + ollirChildType).append(SPACE);
+            }
+            code.append(")");
+        }
 
         // type
         // TODO: Hardcoded for int, needs to be expanded
@@ -190,6 +212,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                     invokespecial(this, "<init>").V;
                 }
                 """.formatted(table.getClassName());
+    }
+
+    //Handle kind ImportDecl
+    private String visitImport(JmmNode node, Void unused) {
+
+        StringBuilder code = new StringBuilder();
+        code.append("import").append(SPACE).append(node.get("ID")).append(END_STMT);
+
+        return code.toString();
     }
 
 

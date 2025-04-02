@@ -1,5 +1,6 @@
 package pt.up.fe.comp2025.optimization;
 
+import com.sun.jdi.BooleanType;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -35,6 +36,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(BOOLEAN_LITERAL, this::visitBoolean);
 
 //        setDefaultVisit(this::defaultVisit);
     }
@@ -44,6 +46,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var intType = TypeUtils.newIntType();
         String ollirIntType = ollirTypes.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
+        return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitBoolean(JmmNode node, Void unused) {
+        var booleanType = new Type("boolean", false);
+        String ollirBooleanType = ollirTypes.toOllirType(booleanType);
+        String code = node.get("name") + ollirBooleanType;
         return new OllirExprResult(code);
     }
 
