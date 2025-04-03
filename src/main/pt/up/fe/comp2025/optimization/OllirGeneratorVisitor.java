@@ -1,5 +1,6 @@
 package pt.up.fe.comp2025.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -7,6 +8,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static pt.up.fe.comp2025.ast.Kind.*;
@@ -96,9 +98,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitReturn(JmmNode node, Void unused) {
-        // TODO: Hardcoded for int type, needs to be expanded
-        Type retType = TypeUtils.newIntType();
-
+        String nameMethod = node.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+        Type retType = table.getReturnType(nameMethod);
 
         StringBuilder code = new StringBuilder();
 
@@ -146,25 +147,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         // name
-        var name = node.get("nameMethod");
-        code.append(name);
+        var nameMethod = node.get("nameMethod");
+        code.append(nameMethod);
 
         // params
-        // TODO: Poor implemented, still need to be fixed
-        if (node.getNumChildren() > 0){
+        if (!table.getParameters(nameMethod).isEmpty()){
             code.append("(");
-            for (var param : node.getChildren()) {
-                var child = TypeUtils.convertType(param);
-                String ollirChildType = ollirTypes.toOllirType(child);
-                code.append(child.getName() + ollirChildType).append(SPACE);
+            for (var param : table.getParameters(nameMethod)){
+                String ollirChildType = ollirTypes.toOllirType(param.getType());
+                code.append(param.getName() + ollirChildType).append(SPACE);
             }
             code.append(")");
         }
 
         // type
-        // TODO: Hardcoded for int, needs to be expanded
-        var retType = ".i32";
-        code.append(retType);
+        var retType = table.getReturnType(nameMethod);
+        var ollirRetType = ollirTypes.toOllirType(retType);
+        code.append(ollirRetType);
         code.append(L_BRACKET);
 
 
@@ -187,6 +186,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(NL);
         code.append(table.getClassName());
+
+        String superClassName = node.getOptional("nameExtendClass").orElse(null);
+        if (superClassName != null) {
+            code.append(SPACE);
+            code.append("extends");
+            code.append(SPACE);
+            code.append(superClassName);
+        }
+
         
         code.append(L_BRACKET);
         code.append(NL);
