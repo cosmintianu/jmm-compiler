@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,9 +104,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         StringBuilder code = new StringBuilder();
 
-
         var expr = node.getNumChildren() > 0 ? exprVisitor.visit(node.getChild(0)) : OllirExprResult.EMPTY;
-
 
         code.append(expr.getComputation());
         code.append("ret");
@@ -137,6 +136,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         boolean isPublic = node.getBoolean("isPublic", false);
         boolean isStatic = node.getBoolean("isStatic", false);
+        boolean isMain = node.getBoolean("isMain", false);
 
         if (isPublic) {
             code.append("public ");
@@ -151,14 +151,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(nameMethod);
 
         // params
-        if (!table.getParameters(nameMethod).isEmpty()){
-            code.append("(");
-            for (var param : table.getParameters(nameMethod)){
-                String ollirChildType = ollirTypes.toOllirType(param.getType());
-                code.append(param.getName() + ollirChildType).append(SPACE);
+        List<Symbol> params = table.getParameters(nameMethod);
+
+        code.append("(");
+        for (int i = 0; i < params.size(); i++) {
+                String ollirChildType = ollirTypes.toOllirType(params.get(i).getType());
+                code.append(params.get(i).getName() + ollirChildType);
+                if (i!= (params.size() - 1)) //multiple params
+                    code.append(",").append(SPACE);
             }
-            code.append(")");
-        }
+        code.append(")");
 
         // type
         var retType = table.getReturnType(nameMethod);

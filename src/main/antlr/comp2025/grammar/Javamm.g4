@@ -65,7 +65,7 @@ type locals[ boolean isArray= false, boolean isVarargs= false]
     | name= INT '...' {$isVarargs = true;} #VarargsType
     | name= BOOLEAN   #BooleanType
     | name= ID    #ClassType
-    | name = STRING  #StringType
+    | name = STRING  ('[' ']' {$isArray = true;})? #StringType
     ;
 
 methodDecl locals[boolean isMain=false, boolean isPublic=false, boolean isStatic=false]
@@ -78,7 +78,7 @@ methodDecl locals[boolean isMain=false, boolean isPublic=false, boolean isStatic
     | {$isMain=true;}
         (PUBLIC {$isPublic=true;})?
         (STATIC {$isStatic=true;})
-         VOID nameMethod=MAIN '(' STRING '[' ']' name=ID ')'
+         VOID nameMethod=MAIN '(' param ')'
         '{' varDecl * stmt* '}'
     ;
 
