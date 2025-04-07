@@ -1,11 +1,16 @@
 package pt.up.fe.comp2025.optimization;
 
 import com.sun.jdi.BooleanType;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static pt.up.fe.comp2025.ast.Kind.*;
 
@@ -23,6 +28,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private final TypeUtils types;
     private final OptUtils ollirTypes;
 
+    private boolean isMethodStatic;
+
 
     public OllirExprGeneratorVisitor(SymbolTable table) {
         this.table = table;
@@ -37,10 +44,23 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_LITERAL, this::visitBoolean);
+        addVisit(METHOD_CALL_EXPR, this::visitMethodCallExpr);
 
 //        setDefaultVisit(this::defaultVisit);
     }
 
+    private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused){
+        //TODO: To be implemented
+        StringBuilder code = new StringBuilder();
+        StringBuilder computation = new StringBuilder();
+
+        String methodName = node.get("name");
+        System.out.println("visitMethodCallExpr " + methodName);
+
+        code.append(methodName);
+
+        return new OllirExprResult(code.toString(), computation.toString());
+    }
 
     private OllirExprResult visitInteger(JmmNode node, Void unused) {
         var intType = TypeUtils.newIntType();

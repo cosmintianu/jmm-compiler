@@ -193,6 +193,9 @@ public class OllirTest {
     public void section1_Basic_Method_Invocation() {
         var result = getOllirResult("basic/BasicMethodInvocation.jmm");
 
+//        Debug
+//        System.out.println(result.getOllirCode());
+
         compileMethodInvocation(result.getOllirClass());
     }
 

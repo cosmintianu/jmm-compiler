@@ -54,8 +54,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(VAR_ASSIGN_STMT, this::visitAssignStmt);
         addVisit(IMPORT_DECL, this::visitImport);
         addVisit(VAR_DECL, this::visitVarDecl);
+        addVisit(EXPR_STMT, this::visitExprStmt);
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitExprStmt(JmmNode node, Void unused) {
+        var code = exprVisitor.visit(node.getChild(0));
+        return code.getComputation();
     }
 
     private String visitVarDecl(JmmNode node,Void unused) {
@@ -81,7 +87,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var left = node.getChild(0);
         Type thisType = types.getExprType(left);
         String typeString = ollirTypes.toOllirType(thisType);
-        var varCode = thisType.get("name") + typeString; //in our case we have 'expr' as the left argument, instead of name=id
+        var varCode = left.get("name") + typeString; //in our case we have 'expr' as the left argument, instead of name=id
 
         code.append(varCode);
         code.append(SPACE);

@@ -252,4 +252,10 @@ public class OwnSemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void BasicMethodInvocation() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/BasicMethodInvocation.jmm"));
+        TestUtils.noErrors(result);
+    }
+
 }
