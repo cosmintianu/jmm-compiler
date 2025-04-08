@@ -19,6 +19,8 @@ import static pt.up.fe.comp2025.ast.Kind.*;
  */
 public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult> {
 
+    private final Character QUOTATION = '"';
+    private final Character COMMA = ',';
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
@@ -50,16 +52,45 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused){
-        //TODO: To be implemented
-        StringBuilder code = new StringBuilder();
+
         StringBuilder computation = new StringBuilder();
 
+        //get target
+        String varRefExprName = node.getChild(0).get("name");
+
+        //check if it is static or virtual
+
+        boolean isMethodStatic = false;
+
+        //are there other cases when a method is static?
+        if (table.getImports().stream()
+                .map(importName -> importName.substring(importName.lastIndexOf('.') + 1))
+                .anyMatch(methodName -> methodName.equals(varRefExprName))) {
+            isMethodStatic = true;
+        }
+
+        String methodInvocation = isMethodStatic ? "invokestatic" : "invokevirtual";
+        computation.append(methodInvocation).append("(").append(varRefExprName).append(COMMA).append(SPACE);
+
+        //get method name
         String methodName = node.get("name");
-        System.out.println("visitMethodCallExpr " + methodName);
+        computation.append(QUOTATION).append(methodName).append(QUOTATION).append(COMMA).append(SPACE);
 
-        code.append(methodName);
+        //visit method params
 
-        return new OllirExprResult(code.toString(), computation.toString());
+        for (int i = 1; i < node.getChildren().size(); i++) {
+            var param = visit(node.getChild(i));
+            computation.append(param.getCode());
+            if (i!= (node.getChildren().size() - 1)) //multiple params
+                computation.append(COMMA).append(SPACE);
+        }
+
+        String code = ".V";
+
+        computation.append(")").append(code).append(END_STMT);
+
+
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitInteger(JmmNode node, Void unused) {

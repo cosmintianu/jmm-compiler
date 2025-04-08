@@ -1,0 +1,23 @@
+import io;
+
+class CompileMethodInvocation {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo() {
+        int a;
+        int[] b;
+
+        io example;
+        example = new io();
+
+        a = b[1 + 2] + 3;
+
+        a = io.println(1+2,9);
+        this.foo();
+
+        return 0;
+    }
+}
