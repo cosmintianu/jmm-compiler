@@ -38,6 +38,9 @@ public class Assignment extends AnalysisVisitor {
         Type leftType = typeUtils.getExprType(assignStmt.getChild(0));
         Type rightType = typeUtils.getExprType(assignStmt.getChild(1));
 
+//        Debug
+        System.out.println("leftType " + leftType + " & rightType " + rightType);
+
         if (rightType.getName().equals("this")) {
             rightType = new Type(table.getClassName(), false);
         }

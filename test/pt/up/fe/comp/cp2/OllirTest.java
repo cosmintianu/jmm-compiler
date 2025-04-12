@@ -207,6 +207,8 @@ public class OllirTest {
 
         var method = CpUtils.getMethod(result, "func4");
 
+         System.out.println(result.getOllirCode());
+
         CpUtils.assertEquals("Method return type", "int[]", CpUtils.toString(method.getReturnType()), result);
     }
 

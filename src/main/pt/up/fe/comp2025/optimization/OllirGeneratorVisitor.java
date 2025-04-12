@@ -25,7 +25,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String NL = "\n";
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
-
+    private final String ARRAY = "array";
+    private final String DOT = ".";
+    private final String NEW = "new";
+    private final String L_PARENTHESES = "(";
+    private final String R_PARENTHESES = ")";
+    private final Character COMMA = ',';
 
     private final SymbolTable table;
 
@@ -55,8 +60,37 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(IMPORT_DECL, this::visitImport);
         addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(EXPR_STMT, this::visitExprStmt);
+        addVisit(ARRAY_INIT_STMT, this::visitArrayInitStmt);
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitArrayInitStmt(JmmNode node, Void unused) {
+
+        //TODO: To be reviewed I am not so confident :,)
+
+        StringBuilder code = new StringBuilder();
+        Type resType = types.getExprType(node.getChild(0));
+
+        //in the way we have defined in the grammar we have 'type=int {array=false}' [ capacity=expr ]
+        String resOllirType = ollirTypes.toOllirType(resType) + DOT + ARRAY;
+
+        String temp0 = ollirTypes.nextTemp() + resOllirType;
+
+        code.append(temp0).append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
+        code.append(NEW).append(L_PARENTHESES).append(ARRAY).append(COMMA).append(SPACE);
+
+        var expr = node.getChild(1);
+        code.append(exprVisitor.visit(expr).getCode()).append(R_PARENTHESES);
+        code.append(resOllirType).append(END_STMT);
+
+        //Getting the temp_var Ollir code
+
+        String arrayName = node.get("name");
+        code.append(arrayName).append(resOllirType).append(SPACE).append(ASSIGN);
+        code.append(resOllirType).append(SPACE).append(temp0).append(END_STMT);
+
+        return code.toString();
     }
 
     private String visitExprStmt(JmmNode node, Void unused) {

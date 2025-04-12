@@ -101,7 +101,7 @@ expr
     : '(' expr ')' #ParenExpr
     | expr '[' expr ']' #IndexAccessExpr
     | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
-    | NEW INT '[' expr ']' #NewArrayExpr
+    | NEW INT '[' capacity=expr ']' #NewArrayExpr
     | NEW name=ID '(' ')' #NewObjectExpr
     | expr '.' LENGTH #LengthExpr
     | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
