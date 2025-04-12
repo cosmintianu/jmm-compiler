@@ -207,8 +207,6 @@ public class OllirTest {
 
         var method = CpUtils.getMethod(result, "func4");
 
-         System.out.println(result.getOllirCode());
-
         CpUtils.assertEquals("Method return type", "int[]", CpUtils.toString(method.getReturnType()), result);
     }
 
@@ -238,6 +236,7 @@ public class OllirTest {
 
     }
 
+    //not correct yet!!
     @Test
     public void section3_ControlFlow_If_Simple_Single_goto() {
 
@@ -249,9 +248,13 @@ public class OllirTest {
         CpUtils.assertEquals("Number of branches", 1, branches.size(), result);
 
         var gotos = CpUtils.assertInstExists(GotoInstruction.class, method, result);
+
+        //System.out.println(result.getOllirCode());
+
         CpUtils.assertTrue("Has at least 1 goto", gotos.size() >= 1, result);
     }
 
+    //not correct yet!!
     @Test
     public void section3_ControlFlow_If_Switch() {
 
@@ -263,6 +266,8 @@ public class OllirTest {
         CpUtils.assertEquals("Number of branches", 6, branches.size(), result);
 
         var gotos = CpUtils.assertInstExists(GotoInstruction.class, method, result);
+
+
         CpUtils.assertTrue("Has at least 6 gotos", gotos.size() >= 6, result);
     }
 

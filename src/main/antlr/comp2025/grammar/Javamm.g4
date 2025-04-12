@@ -87,7 +87,7 @@ param
     ;
 
 stmt
-    : '{' stmt* '}' #BracketStmtexpr
+    : '{' stmt* '}' #BracketStmt
     | IF '(' expr ')' stmt ELSE stmt #IfStmt
     | WHILE '(' expr ')' stmt #WhileStmt
     | expr ';' #ExprStmt

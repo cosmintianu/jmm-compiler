@@ -31,6 +31,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String L_PARENTHESES = "(";
     private final String R_PARENTHESES = ")";
     private final Character COMMA = ',';
+    private final String GOTO = "goto";
+    private final String COLON = ":\n";
 
     private final SymbolTable table;
 
@@ -61,8 +63,42 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(EXPR_STMT, this::visitExprStmt);
         addVisit(ARRAY_INIT_STMT, this::visitArrayInitStmt);
+        addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(BRACKET_STMT, this::visitBracketStmt);
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitBracketStmt(JmmNode node, Void unused){
+
+        return visit(node.getChild(0));
+    }
+
+    private String visitIfStmt(JmmNode node, Void unused){
+        StringBuilder code = new StringBuilder();
+
+        code.append("if").append(SPACE).append(L_PARENTHESES);
+
+        OllirExprResult child = exprVisitor.visit(node.getChild(0));
+        code.append(child.getCode()).append(R_PARENTHESES).append(SPACE);
+
+        String tempThen = ollirTypes.nextIf("then");
+        String tempEndif = ollirTypes.nextIf("endif");
+
+        code.append(GOTO).append(SPACE).append(tempThen).append(END_STMT).append(NL);
+
+       //Get Else body Ollir Code
+        var elseBody = visit(node.getChild(2));
+        code.append(elseBody).append(GOTO).append(SPACE).append(tempEndif).append(END_STMT);
+        code.append(tempThen).append(COLON).append(NL);
+
+        //Get If body Ollir Code
+        var ifBody = visit(node.getChild(1));
+
+        code.append(ifBody).append(tempEndif).append(COLON).append(NL);
+
+
+        return code.toString();
     }
 
     private String visitArrayInitStmt(JmmNode node, Void unused) {
@@ -215,6 +251,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .collect(Collectors.joining("\n   ", "   ", ""));
 
         code.append(stmtsCode);
+
+        if(isMain){
+            code.append("ret.V").append(END_STMT);
+        }
+
         code.append(R_BRACKET);
         code.append(NL);
 

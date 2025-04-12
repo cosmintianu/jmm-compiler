@@ -15,12 +15,19 @@ public class OptUtils {
 
 
     private final AccumulatorMap<String> temporaries;
+    private final AccumulatorMap<String> ifTemporaries;
 
     private final TypeUtils types;
 
     public OptUtils(TypeUtils types) {
         this.types = types;
         this.temporaries = new AccumulatorMap<>();
+        this.ifTemporaries = new AccumulatorMap<>();
+    }
+
+    public String nextIf(String prefix){
+        var nextIfNum = ifTemporaries.add(prefix) - 1;
+        return prefix + nextIfNum;
     }
 
 
