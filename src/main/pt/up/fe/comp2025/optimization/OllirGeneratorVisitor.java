@@ -33,6 +33,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final Character COMMA = ',';
     private final String GOTO = "goto";
     private final String COLON = ":\n";
+    private final String IF = "if";
 
     private final SymbolTable table;
 
@@ -65,8 +66,33 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(ARRAY_INIT_STMT, this::visitArrayInitStmt);
         addVisit(IF_STMT, this::visitIfStmt);
         addVisit(BRACKET_STMT, this::visitBracketStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitWhileStmt(JmmNode node, Void unused){
+        StringBuilder code = new StringBuilder();
+
+        var tempWhile = ollirTypes.nextWhile();
+        var whileCondition = exprVisitor.visit(node.getChild(0));
+
+        code.append(tempWhile).append(COLON).append(whileCondition.getComputation());
+
+        String tempEndif = ollirTypes.nextIf("endif");
+
+        //omg why ollir defines a while this way x.x I don't properly understand what I am doing here
+        code.append(IF).append(SPACE).append(L_PARENTHESES);
+        code.append("!.bool").append(SPACE).append(whileCondition.getCode()).append(R_PARENTHESES);
+        code.append(SPACE).append(GOTO).append(SPACE).append(tempEndif).append(END_STMT);
+
+        //While body
+        var whileBody = visit(node.getChild(1));
+
+        code.append(whileBody).append(NL).append(GOTO).append(SPACE).append(tempWhile).append(END_STMT);
+        code.append(tempEndif).append(COLON);
+
+        return code.toString();
     }
 
     private String visitBracketStmt(JmmNode node, Void unused){
@@ -76,25 +102,29 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitIfStmt(JmmNode node, Void unused){
         StringBuilder code = new StringBuilder();
-
-        code.append("if").append(SPACE).append(L_PARENTHESES);
-
         OllirExprResult child = exprVisitor.visit(node.getChild(0));
+
+        code.append(child.getComputation());
+        code.append(IF).append(SPACE).append(L_PARENTHESES);
+
         code.append(child.getCode()).append(R_PARENTHESES).append(SPACE);
+
+        //Get Else body Ollir Code
+        var elseBody = visit(node.getChild(2));
+
+        //Get If body Ollir Code
+        var ifBody = visit(node.getChild(1));
 
         String tempThen = ollirTypes.nextIf("then");
         String tempEndif = ollirTypes.nextIf("endif");
 
         code.append(GOTO).append(SPACE).append(tempThen).append(END_STMT).append(NL);
 
-       //Get Else body Ollir Code
-        var elseBody = visit(node.getChild(2));
+        //Append else computed body
         code.append(elseBody).append(GOTO).append(SPACE).append(tempEndif).append(END_STMT);
         code.append(tempThen).append(COLON).append(NL);
 
-        //Get If body Ollir Code
-        var ifBody = visit(node.getChild(1));
-
+        //Append if computed body
         code.append(ifBody).append(tempEndif).append(COLON).append(NL);
 
 

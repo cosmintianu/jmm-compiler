@@ -236,7 +236,6 @@ public class OllirTest {
 
     }
 
-    //not correct yet!!
     @Test
     public void section3_ControlFlow_If_Simple_Single_goto() {
 
@@ -249,12 +248,10 @@ public class OllirTest {
 
         var gotos = CpUtils.assertInstExists(GotoInstruction.class, method, result);
 
-        //System.out.println(result.getOllirCode());
-
         CpUtils.assertTrue("Has at least 1 goto", gotos.size() >= 1, result);
     }
 
-    //not correct yet!!
+
     @Test
     public void section3_ControlFlow_If_Switch() {
 

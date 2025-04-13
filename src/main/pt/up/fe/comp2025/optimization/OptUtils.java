@@ -16,6 +16,7 @@ public class OptUtils {
 
     private final AccumulatorMap<String> temporaries;
     private final AccumulatorMap<String> ifTemporaries;
+    private final AccumulatorMap<String> whileTemporaries;
 
     private final TypeUtils types;
 
@@ -23,6 +24,13 @@ public class OptUtils {
         this.types = types;
         this.temporaries = new AccumulatorMap<>();
         this.ifTemporaries = new AccumulatorMap<>();
+        this.whileTemporaries = new AccumulatorMap<>();
+    }
+
+    public String nextWhile(){
+        String prefix = "while";
+        var nextWhileNum = ifTemporaries.add(prefix) - 1;
+        return prefix + nextWhileNum;
     }
 
     public String nextIf(String prefix){
