@@ -193,9 +193,6 @@ public class OllirTest {
     public void section1_Basic_Method_Invocation() {
         var result = getOllirResult("basic/BasicMethodInvocation.jmm");
 
-//        Debug
-//        System.out.println(result.getOllirCode());
-
         compileMethodInvocation(result.getOllirClass());
     }
 
@@ -302,12 +299,16 @@ public class OllirTest {
         var lengthCalls = calls.stream().filter(call -> call instanceof ArrayLengthInstruction)
                 .collect(Collectors.toList());
 
+//        Debug
+//        System.out.println(result.getOllirCode());
+
         CpUtils.assertEquals("Number of 'arraylenght' calls", 1, lengthCalls.size(), result);
     }
 
     /*checks if the access to the elements of array is correct*/
     @Test
     public void section4_Arrays_Access_Array() {
+
         var result = getOllirResult("arrays/ArrayAccess.jmm");
 
         var method = CpUtils.getMethod(result, "foo");
@@ -320,6 +321,8 @@ public class OllirTest {
                 .flatMap(assign -> CpUtils.getElements(assign.getRhs()).stream())
                 .filter(element -> element instanceof ArrayOperand).count();
         CpUtils.assertEquals("Number of array reads", 5, numArrayReads, result);
+
+        System.out.println(result.getOllirCode());
     }
 
     /*checks multiple expressions as indexes to access the elements of an array*/

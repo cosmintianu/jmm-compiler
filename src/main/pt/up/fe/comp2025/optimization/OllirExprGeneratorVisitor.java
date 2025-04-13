@@ -24,6 +24,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
+    private final String ARRAY_LEN = "arraylength";
+    private final String L_PARENTHESES = "(";
+    private final String R_PARENTHESES = ")";
+    private final String L_BRACKET = "[";
+    private final String R_BRACKET = "]";
 
     private final SymbolTable table;
 
@@ -47,8 +52,90 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_LITERAL, this::visitBoolean);
         addVisit(METHOD_CALL_EXPR, this::visitMethodCallExpr);
+        addVisit(LENGTH_EXPR, this::visitLengthExpr);
+        addVisit(NEW_OBJECT_EXPR, this::visitNewObjectExpr);
+        addVisit(INDEX_ACCESS_EXPR, this::visitAccessExpr);
+
+//      TODO: To be implemented
+
+//        NEW_ARRAY_EXPR,
+//        UNARY_EXPR,
+//        PAREN_EXPR,
+//        ARRAY_LITERAL,
+//        THIS_EXPR;
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+/*
+    ********************************************************
+                    Visit Expr Implementations
+    ********************************************************
+*/
+
+    private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {
+
+        String code = "to be implemented";
+        String computation = "also to be implemented";
+
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitAccessExpr(JmmNode node, Void unused) {
+
+        StringBuilder computation = new StringBuilder();
+
+        var left = visit(node.getChild(0));
+        var right = visit(node.getChild(1));
+
+        Type type = types.getExprType(node);
+        String ollirType = ollirTypes.toOllirType(type);
+        String code = ollirTypes.nextTemp() + ollirType;
+
+        computation.append(code);
+        computation.append(SPACE);
+        computation.append(ASSIGN);
+        computation.append(ollirType);
+        computation.append(SPACE);
+
+        computation.append(left.getComputation());
+        computation.append(left.getCode());
+
+        String leftName = node.getChild(0).get("name");
+        String leftComputation = leftName + L_BRACKET + right.getCode() + R_BRACKET + ollirType;
+
+        computation.append(leftComputation);
+        computation.append(END_STMT);
+
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitLengthExpr(JmmNode node, Void unused) {
+
+        StringBuilder computation = new StringBuilder();
+
+        Type type = types.getExprType(node);
+        String ollirType = ollirTypes.toOllirType(type);
+        String code = ollirTypes.nextTemp() + ollirType;
+
+        computation.append(code);
+
+        computation.append(SPACE)
+                .append(ASSIGN)
+                .append(ollirType)
+                .append(SPACE);
+
+        computation.append(ARRAY_LEN)
+                .append(L_PARENTHESES);
+
+        var child = visit(node.getChild(0));
+        computation.append(child.getComputation()).append(child.getCode());
+
+        computation.append(R_PARENTHESES)
+                .append(ollirType)
+                .append(END_STMT);
+
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused){
@@ -59,7 +146,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String varRefExprName = node.getChild(0).get("name");
 
         //check if it is static or virtual
-
         boolean isMethodStatic = false;
 
         //are there other cases when a method is static?
@@ -70,27 +156,32 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         String methodInvocation = isMethodStatic ? "invokestatic" : "invokevirtual";
-        computation.append(methodInvocation).append("(").append(varRefExprName).append(COMMA).append(SPACE);
 
         //get method name
         String methodName = node.get("name");
-        computation.append(QUOTATION).append(methodName).append(QUOTATION).append(COMMA).append(SPACE);
+
+        StringBuilder code = new StringBuilder();
+
+        code.append(methodInvocation).append(L_PARENTHESES).append(varRefExprName).
+                append(COMMA).append(SPACE).append(QUOTATION).append(methodName).
+                append(QUOTATION).append(COMMA).append(SPACE);
 
         //visit method params
 
         for (int i = 1; i < node.getChildren().size(); i++) {
             var param = visit(node.getChild(i));
-            computation.append(param.getCode());
+            computation.append(param.getComputation());
+            code.append(param.getCode());
             if (i!= (node.getChildren().size() - 1)) //multiple params
-                computation.append(COMMA).append(SPACE);
+                code.append(COMMA).append(SPACE);
         }
 
-        String code = ".V";
+        code.append(R_PARENTHESES).append(".V");
 
-        computation.append(")").append(code).append(END_STMT);
+        computation.append(code).append(END_STMT);
 
 
-        return new OllirExprResult(code, computation);
+        return new OllirExprResult(code.toString(), computation);
     }
 
     private OllirExprResult visitInteger(JmmNode node, Void unused) {
@@ -146,6 +237,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         return new OllirExprResult(code);
     }
+
 
     /**
      * Default visitor. Visits every child node and return an empty result.

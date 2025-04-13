@@ -23,13 +23,17 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private static final String ASSIGN = ":=";
     private final String END_STMT = ";\n";
     private final String NL = "\n";
+
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
+    private final String L_PARENTHESES = "(";
+    private final String R_PARENTHESES = ")";
+    private final String L_SQUARE = "[";
+    private final String R_SQUARE = "]";
+
     private final String ARRAY = "array";
     private final String DOT = ".";
     private final String NEW = "new";
-    private final String L_PARENTHESES = "(";
-    private final String R_PARENTHESES = ")";
     private final Character COMMA = ',';
     private final String GOTO = "goto";
     private final String COLON = ":\n";
@@ -67,8 +71,37 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(IF_STMT, this::visitIfStmt);
         addVisit(BRACKET_STMT, this::visitBracketStmt);
         addVisit(WHILE_STMT, this::visitWhileStmt);
+        addVisit(ARRAY_ASSIGN_STMT, this::visitArrayAssignStmt);
 
 //        setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitArrayAssignStmt(JmmNode node, Void unused){
+
+        StringBuilder code = new StringBuilder();
+
+        var nameNode = node.get("name");
+        var intType = TypeUtils.newIntType();
+        String ollirType = ollirTypes.toOllirType(intType);
+
+        String right = exprVisitor.visit(node.getChild(0)).getCode(); //visiting index
+        String left = exprVisitor.visit(node.getChild(1)).getCode();
+
+        code.append(nameNode);
+
+        code.append(L_SQUARE);
+        code.append(right);
+        code.append(R_SQUARE);
+        code.append(ollirType);
+
+        code.append(SPACE);
+        code.append(ASSIGN).append(ollirType);
+        code.append(SPACE);
+
+        code.append(left);
+        code.append(END_STMT);
+
+        return code.toString();
     }
 
     private String visitWhileStmt(JmmNode node, Void unused){
@@ -77,19 +110,36 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var tempWhile = ollirTypes.nextWhile();
         var whileCondition = exprVisitor.visit(node.getChild(0));
 
-        code.append(tempWhile).append(COLON).append(whileCondition.getComputation());
+        code.append(tempWhile);
+        code.append(COLON);
+        code.append(whileCondition.getComputation());
 
         String tempEndif = ollirTypes.nextIf("endif");
 
-        //omg why ollir defines a while this way x.x I don't properly understand what I am doing here
-        code.append(IF).append(SPACE).append(L_PARENTHESES);
-        code.append("!.bool").append(SPACE).append(whileCondition.getCode()).append(R_PARENTHESES);
-        code.append(SPACE).append(GOTO).append(SPACE).append(tempEndif).append(END_STMT);
+        //omg why ollir defines a while this way x.x
+        code.append(IF);
+        code.append(SPACE);
+        code.append(L_PARENTHESES);
+
+        code.append("!.bool");
+        code.append(SPACE);
+        code.append(whileCondition.getCode());
+        code.append(R_PARENTHESES);
+        code.append(SPACE);
+        code.append(GOTO);
+        code.append(SPACE);
+        code.append(tempEndif);
+        code.append(END_STMT);
 
         //While body
         var whileBody = visit(node.getChild(1));
 
-        code.append(whileBody).append(NL).append(GOTO).append(SPACE).append(tempWhile).append(END_STMT);
+        code.append(whileBody).append(NL);
+        code.append(GOTO);
+        code.append(SPACE);
+        code.append(tempWhile);
+        code.append(END_STMT);
+
         code.append(tempEndif).append(COLON);
 
         return code.toString();
@@ -133,8 +183,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitArrayInitStmt(JmmNode node, Void unused) {
 
-        //TODO: To be reviewed I am not so confident :,)
-
         StringBuilder code = new StringBuilder();
         Type resType = types.getExprType(node.getChild(0));
 
@@ -143,18 +191,38 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         String temp0 = ollirTypes.nextTemp() + resOllirType;
 
-        code.append(temp0).append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE);
-        code.append(NEW).append(L_PARENTHESES).append(ARRAY).append(COMMA).append(SPACE);
+        code.append(temp0);
+
+        code.append(SPACE);
+        code.append(ASSIGN).append(resOllirType);
+        code.append(SPACE);
+
+        code.append(NEW);
+        code.append(L_PARENTHESES);
+        code.append(ARRAY);
+        code.append(COMMA);
+        code.append(SPACE);
 
         var expr = node.getChild(1);
-        code.append(exprVisitor.visit(expr).getCode()).append(R_PARENTHESES);
-        code.append(resOllirType).append(END_STMT);
+        var visitExpr = exprVisitor.visit(expr);
+
+        code.append(visitExpr.getComputation()).append(visitExpr.getCode());
+        code.append(R_PARENTHESES);
+        code.append(resOllirType);
+        code.append(END_STMT);
 
         //Getting the temp_var Ollir code
-
         String arrayName = node.get("name");
-        code.append(arrayName).append(resOllirType).append(SPACE).append(ASSIGN);
-        code.append(resOllirType).append(SPACE).append(temp0).append(END_STMT);
+        code.append(arrayName);
+        code.append(resOllirType);
+
+        code.append(SPACE);
+        code.append(ASSIGN).append(resOllirType);
+        code.append(SPACE);
+
+        code.append(temp0);
+        code.append(END_STMT);
+
 
         return code.toString();
     }
@@ -185,15 +253,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // code to compute self
         // statement has type of lhs
         var left = node.getChild(0);
+        var leftCode = exprVisitor.visit(node.getChild(0));
+        code.append(leftCode.getCode());
+
         Type thisType = types.getExprType(left);
         String typeString = ollirTypes.toOllirType(thisType);
-        var varCode = left.get("name") + typeString; //in our case we have 'expr' as the left argument, instead of name=id
 
-        code.append(varCode);
         code.append(SPACE);
-
-        code.append(ASSIGN);
-        code.append(typeString);
+        code.append(ASSIGN).append(typeString);;
         code.append(SPACE);
 
         code.append(rhs.getCode());

@@ -456,7 +456,7 @@ public class CpUtils {
     }
 
     public static List<Element> getElements(Instruction inst) {
-        System.out.println("BEING CALLED FOR:");
+        //System.out.println("BEING CALLED FOR:");
         // inst.show();
         if (inst instanceof SingleOpInstruction) {
             return Arrays.asList(((SingleOpInstruction) inst).getSingleOperand());
