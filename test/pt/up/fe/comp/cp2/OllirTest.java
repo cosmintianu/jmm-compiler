@@ -322,9 +322,10 @@ public class OllirTest {
                 .filter(element -> element instanceof ArrayOperand).count();
         CpUtils.assertEquals("Number of array reads", 5, numArrayReads, result);
 
-        System.out.println(result.getOllirCode());
+//        System.out.println(result.getOllirCode());
     }
 
+    //***** Not working as it should yet - the problem is visitMethodCallExpr *******
     /*checks multiple expressions as indexes to access the elements of an array*/
     @Test
     public void section4_Arrays_Load_ComplexArrayAccess() {

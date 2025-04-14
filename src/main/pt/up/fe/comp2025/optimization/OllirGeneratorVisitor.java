@@ -51,7 +51,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         this.table = table;
         this.types = new TypeUtils(table);
         this.ollirTypes = new OptUtils(types);
-        exprVisitor = new OllirExprGeneratorVisitor(table);
+        exprVisitor = new OllirExprGeneratorVisitor(table, ollirTypes);
     }
 
 
@@ -187,7 +187,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         Type resType = types.getExprType(node.getChild(0));
 
         //in the way we have defined in the grammar we have 'type=int {array=false}' [ capacity=expr ]
-        String resOllirType = ollirTypes.toOllirType(resType) + DOT + ARRAY;
+        String resOllirType = DOT + ARRAY + ollirTypes.toOllirType(resType);
 
         String temp0 = ollirTypes.nextTemp() + resOllirType;
 
