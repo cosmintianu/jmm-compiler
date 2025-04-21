@@ -273,24 +273,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    //TODO: it is not working properly yet
+    //TODO: to be reviewed + adapt to deal with varargs
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused){
 
         TypeUtils typeUtils = new TypeUtils(table);
 
         StringBuilder computation = new StringBuilder();
-
-        var intType = TypeUtils.newIntType();
-        String ollirIntType = ollirTypes.toOllirType(intType);
-        String code = "TESTE" + ollirIntType; //resulting code is generating more temps than it should
-
-//        computation.append(code);
-//        computation.append("TESTE");
-//
-//        computation.append(SPACE)
-//                .append(ASSIGN)
-//                .append(ollirIntType)
-//                .append(SPACE);
+        String code = "";
 
         //get target
         var varRefExpr = node.getChild(0);
@@ -319,6 +308,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         if (!isMethodStatic) {
             Type varType = typeUtils.getExprType(varRefExpr);
             invocation.append(".").append(varType.getName());
+
+            Type expectedRetType = table.getReturnType(methodName);
+            String olliRetType = ollirTypes.toOllirType(expectedRetType);
+
+            code = ollirTypes.nextTemp() + olliRetType;
+
+            computation.append(code).append(SPACE).append(ASSIGN).append(olliRetType).append(SPACE);
         }
 
         invocation.append(COMMA).append(SPACE).append(QUOTATION).
@@ -326,17 +322,24 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 append(COMMA).append(SPACE);
 
         //visit method params
-
         for (int i = 1; i < node.getChildren().size(); i++) {
             var param = visit(node.getChild(i));
-//            computation.append(" param -> " + param);
             computation.append(param.getComputation());
             invocation.append(param.getCode());
             if (i!= (node.getChildren().size() - 1)) //multiple params
                 invocation.append(COMMA).append(SPACE);
         }
 
-        invocation.append(R_PARENTHESES).append(".V");
+        invocation.append(R_PARENTHESES);
+
+
+
+        if (!isMethodStatic) {
+            Type expectedRetType = table.getReturnType(methodName);
+            String olliRetType = ollirTypes.toOllirType(expectedRetType);
+            invocation.append(olliRetType);
+        } else
+            invocation.append(".V"); //TODO: check if it is part of a var assignment
 
         computation.append(invocation).append(END_STMT);
 
