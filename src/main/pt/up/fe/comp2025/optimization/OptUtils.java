@@ -64,7 +64,7 @@ public class OptUtils {
         return type.isArray() ? ".array" + toOllirType(type.getName()) : toOllirType(type.getName());
     }
 
-    private String toOllirType(String typeName) {
+    public String toOllirType(String typeName) {
 
         String type = "." + switch (typeName) {
             case "int" -> "i32";
