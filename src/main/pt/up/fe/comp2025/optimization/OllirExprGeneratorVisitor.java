@@ -273,7 +273,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    //TODO: to be reviewed + adapt to deal with varargs
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused){
 
         TypeUtils typeUtils = new TypeUtils(table);
@@ -287,6 +286,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         //check if it is static or virtual
         boolean isMethodStatic = false;
+        boolean isThis = varRefExprName.equals("this");
 
         //are there other cases when a method is static?
         if (table.getImports().stream()
@@ -302,44 +302,83 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         StringBuilder invocation = new StringBuilder();
 
+        // *************** Finding return Type *****************
+
+        String ollirRetType;
+
+        if (!isMethodStatic) {
+            Type expectedRetType = table.getReturnType(methodName);
+            ollirRetType = ollirTypes.toOllirType(expectedRetType);
+        } else{
+            if (node.getParent().isInstance(ARRAY_ASSIGN_STMT))
+                ollirRetType = ".i32";
+
+            else if (node.getParent().isInstance(VAR_ASSIGN_STMT)) {
+                String currentMethodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+                String typeName = node.getParent().getChild(0).get("name");
+
+                for (Symbol localVar : table.getLocalVariables(currentMethodName)) {
+                    if (localVar.getName().equals(typeName)) {
+                        typeName = localVar.getType().getName();
+                    }
+                }
+
+                for (Symbol param : table.getParameters(currentMethodName)) {
+                    if (param.getName().equals(typeName)) {
+                        typeName = param.getType().getName();
+                    }
+                }
+
+                ollirRetType = ollirTypes.toOllirType(typeName);
+            }
+            else
+                ollirRetType = ".V";
+
+        }
+
+        //******************************************
+
+        if(!ollirRetType.equals(".V") && !node.getParent().isInstance(EXPR_STMT)) {
+            code = ollirTypes.nextTemp() + ollirRetType;
+            invocation.append(code).append(SPACE).append(ASSIGN).append(ollirRetType).append(SPACE);
+        }
+
         invocation.append(methodInvocation).append(L_PARENTHESES).append(varRefExprName);
+
 
         //if invokevirtual, specify the type
         if (!isMethodStatic) {
-            Type varType = typeUtils.getExprType(varRefExpr);
-            invocation.append(".").append(varType.getName());
 
-            Type expectedRetType = table.getReturnType(methodName);
-            String olliRetType = ollirTypes.toOllirType(expectedRetType);
+            if(!isThis){
+                Type varType = typeUtils.getExprType(varRefExpr);
+                invocation.append(".").append(varType.getName());
+            }else {
+                String className = table.getClassName();
+                invocation.append(".").append(className);
+            }
 
-            code = ollirTypes.nextTemp() + olliRetType;
-
-            computation.append(code).append(SPACE).append(ASSIGN).append(olliRetType).append(SPACE);
         }
 
         invocation.append(COMMA).append(SPACE).append(QUOTATION).
-                append(methodName).append(QUOTATION).
-                append(COMMA).append(SPACE);
+                append(methodName).append(QUOTATION);
 
         //visit method params
         for (int i = 1; i < node.getChildren().size(); i++) {
+            if (i == 1)
+                invocation.append(COMMA).append(SPACE);
             var param = visit(node.getChild(i));
             computation.append(param.getComputation());
             invocation.append(param.getCode());
+
             if (i!= (node.getChildren().size() - 1)) //multiple params
                 invocation.append(COMMA).append(SPACE);
+
+//            if ( i == (node.getChildren().size() - 1)){} //handle varargs -- not mandatory for now
+
         }
 
-        invocation.append(R_PARENTHESES);
-
-
-
-        if (!isMethodStatic) {
-            Type expectedRetType = table.getReturnType(methodName);
-            String olliRetType = ollirTypes.toOllirType(expectedRetType);
-            invocation.append(olliRetType);
-        } else
-            invocation.append(".V"); //TODO: check if it is part of a var assignment
+        invocation.append(R_PARENTHESES).
+                append(ollirRetType);
 
         computation.append(invocation).append(END_STMT);
 

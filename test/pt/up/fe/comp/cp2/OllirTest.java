@@ -325,7 +325,6 @@ public class OllirTest {
 //        System.out.println(result.getOllirCode());
     }
 
-    //***** Not working as it should yet - the problem is visitMethodCallExpr *******
     /*checks multiple expressions as indexes to access the elements of an array*/
     @Test
     public void section4_Arrays_Load_ComplexArrayAccess() {
@@ -377,6 +376,21 @@ public class OllirTest {
     public void ArrayLiteral() {
 
         var result = getOllirResult("own_ollir_tests/ArrayLiteral.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //No need to handle with varargs for now
+    @Test
+    public void Varargs() {
+
+        var result = getOllirResult("own_ollir_tests/Varargs.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void MethodInvocation() {
+
+        var result = getOllirResult("own_ollir_tests/MethodInvocation.jmm");
         System.out.println(result.getOllirCode());
     }
 

@@ -62,7 +62,7 @@ varDecl
 
 type locals[ boolean isArray= false, boolean isVarargs= false]
     : name= INT ('[' ']' {$isArray = true;})? #IntType
-    | name= INT '...' {$isVarargs = true;} #VarargsType
+    | name= INT '...' {$isVarargs = true; $isArray = true;} #VarargsType
     | name= BOOLEAN   #BooleanType
     | name= ID    #ClassType
     | name = STRING  ('[' ']' {$isArray = true;})? #StringType

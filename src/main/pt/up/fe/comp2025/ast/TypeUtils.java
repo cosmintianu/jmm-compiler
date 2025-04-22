@@ -71,9 +71,15 @@ public class TypeUtils {
     }
 
     private Type getMethodExprType(JmmNode methodExpr) {
+
         String idName = methodExpr.get("name");
 
-        return table.getReturnType(idName);
+        if (table.getReturnType(idName) != null) {
+            return table.getReturnType(idName);
+        }
+        else {
+            return new Type("methodExpr_assign", false);
+        }
     }
 
 

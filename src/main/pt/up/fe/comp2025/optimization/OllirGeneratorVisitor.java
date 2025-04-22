@@ -38,6 +38,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String GOTO = "goto";
     private final String COLON = ":\n";
     private final String IF = "if";
+    private final Character QUOTATION = '"';
 
     private final SymbolTable table;
 
@@ -325,6 +326,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // params
         List<Symbol> params = table.getParameters(nameMethod);
+
+        if(nameMethod.equals("varargs"))
+            code.append(SPACE + QUOTATION + "varargs" + QUOTATION);
 
         code.append("(");
         for (int i = 0; i < params.size(); i++) {

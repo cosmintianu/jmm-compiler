@@ -41,6 +41,11 @@ public class Assignment extends AnalysisVisitor {
 //        Debug
 //        System.out.println("leftType " + leftType + " & rightType " + rightType);
 
+        if(rightType.getName().equals("methodExpr_assign")){
+            // rightType copys leftType value
+            rightType = typeUtils.getExprType(assignStmt.getChild(0));
+        }
+
         if (rightType.getName().equals("this")) {
             rightType = new Type(table.getClassName(), false);
         }
