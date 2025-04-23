@@ -25,6 +25,10 @@ public class OllirTest {
         return TestUtils.optimize(SpecsIo.getResource("pt/up/fe/comp/cp2/ollir/" + filename));
     }
 
+    static OllirResult getOllirResult2(String filename) {
+        return TestUtils.optimize(SpecsIo.getResource("pt/up/fe/comp/cp1/" + filename));
+    }
+
     public void compileBasic(ClassUnit classUnit) {
         // Test name of the class and super
         assertEquals("Class name not what was expected", "CompileBasic", classUnit.getClassName());
@@ -393,5 +397,57 @@ public class OllirTest {
         var result = getOllirResult("own_ollir_tests/MethodInvocation.jmm");
         System.out.println(result.getOllirCode());
     }
+
+//    Copying some Semantic Tests ;)
+
+    @Test
+    public void SymbolTable() {
+
+        var result = getOllirResult2("semanticanalysis/SymbolTable.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ObjectAssignmentPassExtends() {
+
+        var result = getOllirResult2("semanticanalysis/ObjectAssignmentPassExtends.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void objectAssignmentPassImports() {
+
+        var result = getOllirResult2("semanticanalysis/objectAssignmentPassImports.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void callToMethodAssumedInExtends() {
+
+        var result = getOllirResult2("semanticanalysis/callToMethodAssumedInExtends.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void callToMethodAssumedInImport() {
+
+        var result = getOllirResult2("semanticanalysis/callToMethodAssumedInImport.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void assumeArguments() {
+
+        var result = getOllirResult2("semanticanalysis/assumeArguments.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void VarNotDeclared2() {
+
+        var result = getOllirResult2("ownsemanticanalysis/VarNotDeclared2.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
 
 }

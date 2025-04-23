@@ -300,6 +300,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         //get method name
         String methodName = node.get("name");
 
+        String currentMethodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+
         StringBuilder invocation = new StringBuilder();
 
         // *************** Finding return Type *****************
@@ -308,13 +310,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         if (!isMethodStatic) {
             Type expectedRetType = table.getReturnType(methodName);
-            ollirRetType = ollirTypes.toOllirType(expectedRetType);
+            
+            if (expectedRetType != null) {
+                ollirRetType = ollirTypes.toOllirType(expectedRetType);
+            } else {
+                ollirRetType = ".V";
+            }
         } else{
             if (node.getParent().isInstance(ARRAY_ASSIGN_STMT))
                 ollirRetType = ".i32";
 
             else if (node.getParent().isInstance(VAR_ASSIGN_STMT)) {
-                String currentMethodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+                //String currentMethodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
                 String typeName = node.getParent().getChild(0).get("name");
 
                 for (Symbol localVar : table.getLocalVariables(currentMethodName)) {
@@ -330,8 +337,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 }
 
                 ollirRetType = ollirTypes.toOllirType(typeName);
-            }
-            else
+            } else
                 ollirRetType = ".V";
 
         }
