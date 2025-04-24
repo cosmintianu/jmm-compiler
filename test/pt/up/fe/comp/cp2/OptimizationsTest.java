@@ -46,6 +46,17 @@ public class OptimizationsTest {
         return CpUtils.getOllirResult(SpecsIo.getResource(BASE_PATH + filename), config, true);
     }
 
+    //Trying something simple to start
+    @Test
+    public void SimpleTest() {
+        String filename = "own_tests/SimpleTest.jmm";
+        OllirResult original = getOllirResult(filename);
+        OllirResult optimized = getOllirResultOpt(filename);
+
+        System.out.println("original -> " + original.getOllirCode());
+        System.out.println("optimized -> " + optimized.getOllirCode());
+    }
+
     @Test
     public void regAllocSimple() {
 

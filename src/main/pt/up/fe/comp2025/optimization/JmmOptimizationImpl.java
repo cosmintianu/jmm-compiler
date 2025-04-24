@@ -3,8 +3,10 @@ package pt.up.fe.comp2025.optimization;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp2025.ConfigOptions;
 
 import java.util.Collections;
+import java.util.Map;
 
 public class JmmOptimizationImpl implements JmmOptimization {
 
@@ -23,19 +25,44 @@ public class JmmOptimizationImpl implements JmmOptimization {
     }
 
     @Override
+    //AST-based optimizations here
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
 
-        var config = semanticsResult.getConfig();
-        var isOptimized = config.getOrDefault("optimize", "false");
+        Map<String, String> config = semanticsResult.getConfig();
+        var isOptimized = ConfigOptions.getOptimize(config);
 
-        //TODO: Do your AST-based optimizations here
+        if (!isOptimized)
+        {
+            var rootNode = semanticsResult.getRootNode();
+            //TODO -> Constant Propagation
 
-        //TODO -> Constant Propagation
-        // When it is an VarAssignStmt, check if child0 it is Literal and substitute constant for value
-        // When it is VarRefExpr, do the same
+            // When it is an VarAssignStmt, check if child0 it is Literal and substitute constant for value
+            if (rootNode.getKind().equals("VarAssignStmt")){
+                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
-        //TODO -> Constant Folding
-        // When it is a BinaryExpr, if both sides are literals replace the BinaryExpr with the resulting value
+                var root_name = rootNode.get("name");
+                var child = rootNode.getChild(0);
+                var child_kind = child.getKind();
+
+                if (child_kind.equals("IntegerLiteral")){
+                    config.put(root_name, child.get("value"));
+                } else if (child_kind.equals("BooleanLiteral")){
+                    config.put(root_name, child.get("name"));
+                } else {
+                    config.remove(root_name);
+                }
+            }
+            // When it is VarRefExpr, do the same
+            else if (rootNode.getKind().equals("VarRefExpr")){
+
+            }
+
+
+
+            //TODO -> Constant Folding
+            // When it is a BinaryExpr, if both sides are literals replace the BinaryExpr with the resulting value
+        }
+
 
         return semanticsResult;
     }
