@@ -25,7 +25,17 @@ public class JmmOptimizationImpl implements JmmOptimization {
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
 
+        var config = semanticsResult.getConfig();
+        var isOptimized = config.getOrDefault("optimize", "false");
+
         //TODO: Do your AST-based optimizations here
+
+        //TODO -> Constant Propagation
+        // When it is an VarAssignStmt, check if child0 it is Literal and substitute constant for value
+        // When it is VarRefExpr, do the same
+
+        //TODO -> Constant Folding
+        // When it is a BinaryExpr, if both sides are literals replace the BinaryExpr with the resulting value
 
         return semanticsResult;
     }

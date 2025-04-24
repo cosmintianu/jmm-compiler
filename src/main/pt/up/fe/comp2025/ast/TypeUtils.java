@@ -74,11 +74,27 @@ public class TypeUtils {
 
         String idName = methodExpr.get("name");
 
+        var parent = methodExpr.getParent();
+        var varRefType = getExprType(methodExpr.getChild(0));
+
         if (table.getReturnType(idName) != null) {
             return table.getReturnType(idName);
         }
+
+        //case parent is returnType e child is import
+        else if (parent.getKind().equals("ReturnStmt") && table.getImports().contains(varRefType.getName())) {
+
+            var currentMethod = methodExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+            var returnType = table.getReturnType(currentMethod);
+            return returnType;
+        }
+        // parent is assignStmt
+        else if (parent.getKind().equals("VarAssignStmt")) {
+            var left_side = parent.getChild(0);
+            return getExprType(left_side);
+        }
         else {
-            return new Type("methodExpr_assign", false);
+            return null;
         }
     }
 

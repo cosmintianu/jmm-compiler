@@ -309,8 +309,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String ollirRetType;
 
         if (!isMethodStatic) {
-            Type expectedRetType = table.getReturnType(methodName);
-            
+            Type expectedRetType = typeUtils.getExprType(node);
+
             if (expectedRetType != null) {
                 ollirRetType = ollirTypes.toOllirType(expectedRetType);
             } else {
