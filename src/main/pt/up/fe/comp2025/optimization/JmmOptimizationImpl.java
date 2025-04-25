@@ -1,14 +1,21 @@
 package pt.up.fe.comp2025.optimization;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp2025.ConfigOptions;
+import pt.up.fe.comp2025.symboltable.JmmSymbolTableBuilder;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class JmmOptimizationImpl implements JmmOptimization {
+
+    private OptimizationVisitor optimizationVisitor;
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
@@ -31,38 +38,21 @@ public class JmmOptimizationImpl implements JmmOptimization {
         Map<String, String> config = semanticsResult.getConfig();
         var isOptimized = ConfigOptions.getOptimize(config);
 
-        if (!isOptimized)
-        {
+        if(isOptimized) {
+
+            this.optimizationVisitor = new OptimizationVisitor();
+            this.optimizationVisitor.buildVisitor();
+
             var rootNode = semanticsResult.getRootNode();
-            //TODO -> Constant Propagation
 
-            // When it is an VarAssignStmt, check if child0 it is Literal and substitute constant for value
-            if (rootNode.getKind().equals("VarAssignStmt")){
-                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            JmmSymbolTableBuilder tableBuilder = new JmmSymbolTableBuilder();
+            SymbolTable table = tableBuilder.build(rootNode);
 
-                var root_name = rootNode.get("name");
-                var child = rootNode.getChild(0);
-                var child_kind = child.getKind();
-
-                if (child_kind.equals("IntegerLiteral")){
-                    config.put(root_name, child.get("value"));
-                } else if (child_kind.equals("BooleanLiteral")){
-                    config.put(root_name, child.get("name"));
-                } else {
-                    config.remove(root_name);
-                }
+            while (this.optimizationVisitor.opt){
+                this.optimizationVisitor.opt= false;
+                this.optimizationVisitor.optimize(rootNode, table);
             }
-            // When it is VarRefExpr, do the same
-            else if (rootNode.getKind().equals("VarRefExpr")){
-
-            }
-
-
-
-            //TODO -> Constant Folding
-            // When it is a BinaryExpr, if both sides are literals replace the BinaryExpr with the resulting value
         }
-
 
         return semanticsResult;
     }
