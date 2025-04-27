@@ -46,7 +46,7 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
     public Void constantFolding(JmmNode node, SymbolTable table) {
 
         var rhs = node.getChild(1);
-        var lhs = rhs.getChild(0);
+        var lhs = node.getChild(0);
 
         if (lhs.getKind().equals("IntegerLiteral") && rhs.getKind().equals("IntegerLiteral")) {
 
