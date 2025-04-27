@@ -1,12 +1,13 @@
 package pt.up.fe.comp2025.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2025.ast.Kind;
+import pt.up.fe.comp2025.ast.TypeUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
         addVisit(Kind.VAR_ASSIGN_STMT, this::constantPropagation);
         addVisit(Kind.VAR_REF_EXPR, this::constantPropagation_varRef);
         addVisit(Kind.BINARY_EXPR, this::constantFolding);
+        addVisit(Kind.METHOD_DECL, this::visitMethod);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -29,7 +31,12 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
     }
 
     private Void defaultVisit(JmmNode node, SymbolTable table) {
-        visitAllChildren(node, table);
+        //visitAllChildren(node, table);
+        return null;
+    }
+
+    private Void visitMethod(JmmNode node, SymbolTable table) {
+        constants.clear();
         return null;
     }
 
@@ -37,8 +44,6 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
     // if both sides are literals replace the BinaryExpr with the resulting value
     public Void constantFolding(JmmNode node, SymbolTable table) {
-
-        constants.clear();
 
         var rhs = node.getChild(1);
         var lhs = rhs.getChild(0);
@@ -103,19 +108,20 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
     public Void constantPropagation(JmmNode node, SymbolTable table) {
 
-        constants.clear();
+        var left_child = node.getChild(0);
+        var right_child = node.getChild(1);
 
-        var child = node.getChild(0);
-        var node_name = child.get("name");
+        //System.out.println(node + "  " + left_child + " ::: " + right_child);
 
-        visit(child, table);
+        var node_name = left_child.get("name");
+        var right_kind = right_child.getKind();
 
-        var child_kind = child.getKind();
+        visit(left_child, table);
 
-        if (child_kind.equals("IntegerLiteral")){
-            constants.put(node_name, child.get("value"));
-        } else if (child_kind.equals("BooleanLiteral")){
-            constants.put(node_name, child.get("name"));
+        if (right_kind.equals("IntegerLiteral")){
+            constants.put(node_name, right_child.get("value"));
+        } else if (right_kind.equals("BooleanLiteral")){
+            constants.put(node_name, right_child.get("name"));
         } else {
             constants.remove(node_name);
         }
@@ -125,13 +131,12 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
     public Void constantPropagation_varRef(JmmNode node, SymbolTable table) {
 
-        constants.clear();
-
         var node_name = node.get("name");
 
         if (constants.containsKey(node_name)){
 
             String val = constants.get(node_name);
+
             String bool_or_int = val.equals("true") || val.equals("false")? "BooleanLiteral" : "IntegerLiteral";
 
             List<String> kindHierarchy = List.of(bool_or_int);
@@ -139,7 +144,8 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
             replacement.put("value", val);
 
-            node.replace(replacement);
+            if (!node.getParent().getKind().equals("VarAssignStmt"))
+                node.replace(replacement);
         }
 
         return null;

@@ -48,10 +48,10 @@ public class JmmOptimizationImpl implements JmmOptimization {
             JmmSymbolTableBuilder tableBuilder = new JmmSymbolTableBuilder();
             SymbolTable table = tableBuilder.build(rootNode);
 
-            while (!this.optimizationVisitor.opt){
-                this.optimizationVisitor.opt= false;
+            do {
+                this.optimizationVisitor.opt = false;
                 this.optimizationVisitor.optimize(rootNode, table);
-            }
+            } while (this.optimizationVisitor.opt);
         }
 
         return semanticsResult;
