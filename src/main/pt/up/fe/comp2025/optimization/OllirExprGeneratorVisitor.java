@@ -159,14 +159,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
        
         Type type = types.getExprType(node);
         String ollirType = ollirTypes.toOllirType(type);
-        String temp = ollirTypes.nextTemp() + ollirType;
+        String code = ollirTypes.nextTemp() + ollirType;
     
         StringBuilder computation = new StringBuilder();
     
         var expr = visit(node.getChild(0)); 
     
         computation.append(expr.getComputation());
-        computation.append(temp)
+        computation.append(code)
             .append(SPACE)
             .append(ASSIGN)
             .append(ollirType)
@@ -181,7 +181,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             .append(ollirType)
             .append(END_STMT);
     
-        return new OllirExprResult(temp, computation.toString());
+        return new OllirExprResult(code, computation.toString());
     }
     
 
