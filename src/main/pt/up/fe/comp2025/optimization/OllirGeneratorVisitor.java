@@ -243,7 +243,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
-
+    
         var rhs = exprVisitor.visit(node.getChild(1));
 
         StringBuilder code = new StringBuilder();
@@ -251,26 +251,60 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // code to compute the children
         code.append(rhs.getComputation());
 
-        // code to compute self
-        // statement has type of lhs
-        var left = node.getChild(0);
-        var leftCode = exprVisitor.visit(node.getChild(0));
-        code.append(leftCode.getCode());
-
-        Type thisType = types.getExprType(left);
-        String typeString = ollirTypes.toOllirType(thisType);
-
-        code.append(SPACE);
-        code.append(ASSIGN).append(typeString);;
-        code.append(SPACE);
-
-        code.append(rhs.getCode());
-
-        code.append(END_STMT);
-
+        var lhs = node.getChild(0);
+        OllirExprResult lhsResult = exprVisitor.visit(lhs);
+    
+        Type lhsType = types.getExprType(lhs);
+        String ollirLhsType = ollirTypes.toOllirType(lhsType);
+    
+        String lhsName = lhs.get("name"); 
+        String currentMethodName = node.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+    
+        boolean isLocalOrParam = table.getLocalVariables(currentMethodName).stream().anyMatch(var -> var.getName().equals(lhsName)) ||
+                                  table.getParameters(currentMethodName).stream().anyMatch(param -> param.getName().equals(lhsName));
+    
+        if (lhs.isInstance(INDEX_ACCESS_EXPR)) {
+            // Array store
+            code.append(lhsResult.getCode())
+                .append(SPACE)
+                .append(ASSIGN)
+                .append(ollirLhsType)
+                .append(SPACE)
+                .append(rhs.getCode())
+                .append(END_STMT);
+    
+        } else if (!isLocalOrParam) {
+            // Field store 
+            code.append("putfield")
+                .append(L_PARENTHESES)
+                .append("this")
+                .append(COMMA)
+                .append(SPACE)
+                .append(lhsName)
+                .append(ollirLhsType)
+                .append(COMMA)
+                .append(SPACE)
+                .append(rhs.getCode())
+                .append(R_PARENTHESES)
+                .append(DOT)
+                .append("V")
+                .append(END_STMT);
+    
+        } else {
+            // Local variable or parameter store
+            code.append(lhsResult.getCode())
+                .append(SPACE)
+                .append(ASSIGN)
+                .append(ollirLhsType)
+                .append(SPACE)
+                .append(rhs.getCode())
+                .append(END_STMT);
+        }
+    
         return code.toString();
     }
-
+    
+    
 
     private String visitReturn(JmmNode node, Void unused) {
         String nameMethod = node.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
@@ -384,6 +418,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(NL);
         code.append(NL);
 
+        for (var field : table.getFields()) {
+            String fieldName = field.getName();
+            String fieldType = ollirTypes.toOllirType(field.getType());
+            code.append(".field public ").append(fieldName).append(fieldType).append(";").append(NL);
+        }
+    
+        code.append(NL);
+        
         code.append(buildConstructor());
         code.append(NL);
 
