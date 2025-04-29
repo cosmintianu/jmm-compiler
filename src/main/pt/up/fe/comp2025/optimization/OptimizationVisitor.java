@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
         addVisit(Kind.VAR_REF_EXPR, this::constantPropagation_varRef);
         addVisit(Kind.BINARY_EXPR, this::constantFolding);
         addVisit(Kind.METHOD_DECL, this::visitMethod);
+        addVisit(Kind.WHILE_STMT, this::visitWhile);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -42,11 +44,34 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
     //************ Constant Folding ****************
 
+    public Void visitWhile(JmmNode node, SymbolTable table) {
+
+        var rhs = node.getChild(1); // bracketExpr
+        var lhs = node.getChild(0); // condition
+
+//        System.out.println("consts before -> " + constants);
+
+
+        for (var assign : rhs.getDescendants(Kind.VAR_ASSIGN_STMT)) {
+            var child = assign.getChild(0);
+            if (child.getKind().equals("VarRefExpr")){
+                var child_name = child.get("name");
+                constants.remove(child_name);
+            }
+        }
+
+//        System.out.println("consts after -> " + constants);
+
+        return null;
+    }
+
     // if both sides are literals replace the BinaryExpr with the resulting value
     public Void constantFolding(JmmNode node, SymbolTable table) {
 
         var rhs = node.getChild(1);
         var lhs = node.getChild(0);
+
+//        System.out.println("rhs -> " + rhs + "lhs -> " + lhs);
 
         if (lhs.getKind().equals("IntegerLiteral") && rhs.getKind().equals("IntegerLiteral")) {
 
@@ -94,7 +119,12 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
             case "*"-> result = String.valueOf(left * right);
             case "-" -> result = String.valueOf(left - right) ;
             case  "/" -> result = String.valueOf(left / right);
-            case "<" -> result = String.valueOf(left < right);
+            case "<" -> {
+                result = String.valueOf(left < right);
+                JmmNode replacement = new JmmNodeImpl(List.of("BooleanLiteral"));
+                replacement.put("name", result);
+                return replacement;
+            }
             default -> throw new IllegalStateException("Unexpected value: " + op);
         }
 
@@ -110,8 +140,6 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
         var left_child = node.getChild(0);
         var right_child = node.getChild(1);
-
-        //System.out.println(node + "  " + left_child + " ::: " + right_child);
 
         var node_name = left_child.get("name");
         var right_kind = right_child.getKind();
@@ -144,8 +172,11 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
             replacement.put("value", val);
 
-            if (!node.getParent().getKind().equals("VarAssignStmt"))
+            if (!node.getParent().getKind().equals("VarAssignStmt")){
+                opt = true;
                 node.replace(replacement);
+            }
+
         }
 
         return null;

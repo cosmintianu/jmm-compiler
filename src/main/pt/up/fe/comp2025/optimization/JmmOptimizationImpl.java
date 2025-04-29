@@ -47,8 +47,11 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
             JmmSymbolTableBuilder tableBuilder = new JmmSymbolTableBuilder();
             SymbolTable table = tableBuilder.build(rootNode);
+            int counter = 1;
 
             do {
+                System.out.println("Visiting for the " + counter + " time..");
+                counter++;
                 this.optimizationVisitor.opt = false;
                 this.optimizationVisitor.optimize(rootNode, table);
             } while (this.optimizationVisitor.opt);

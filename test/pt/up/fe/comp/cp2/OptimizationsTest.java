@@ -122,6 +122,7 @@ public class OptimizationsTest {
         String filename = "const_prop_fold/PropWithLoop.jmm";
 
         OllirResult original = getOllirResult(filename);
+        System.out.println("Original code:\n" + original.getOllirCode());
         OllirResult optimized = getOllirResultOpt(filename);
 
         CpUtils.assertNotEquals("Expected code to change with -o flag\n\nOriginal code:\n" + original.getOllirCode(),
@@ -138,6 +139,7 @@ public class OptimizationsTest {
         String filename = "const_prop_fold/FoldSimple.jmm";
 
         var original = getOllirResult(filename);
+
         var optimized = getOllirResultOpt(filename);
 
 
