@@ -224,6 +224,7 @@ public class OllirTest {
         var method = CpUtils.getMethod(ollirResult, "main");
         var numBranches = CpUtils.getInstructions(CondBranchInstruction.class, method).size();
 
+        System.out.println(ollirResult.getOllirCode());
 
         CpUtils.assertTrue("Expected at least 2 branches, found " + numBranches, numBranches >= 2, ollirResult);
     }

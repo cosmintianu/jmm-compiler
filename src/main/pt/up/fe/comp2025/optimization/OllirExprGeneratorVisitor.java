@@ -31,6 +31,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private final String L_BRACKET = "[";
     private final String R_BRACKET = "]";
 
+    private final String GOTO = "goto";
+    private final String COLON = ":\n";
+
     private final String NEW = "new";
 
     private final SymbolTable table;
@@ -400,7 +403,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitBoolean(JmmNode node, Void unused) {
         var booleanType = new Type("boolean", false);
         String ollirBooleanType = ollirTypes.toOllirType(booleanType);
-        String code = node.get("name") + ollirBooleanType;
+
+        var bool_name = node.get("name").equals("true") ? 1 : 0;
+
+        String code = bool_name + ollirBooleanType;
         return new OllirExprResult(code);
     }
 
@@ -408,26 +414,72 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
 
         var lhs = visit(node.getChild(0));
-        var rhs = visit(node.getChild(1));
+        var op = node.get("op");
 
         StringBuilder computation = new StringBuilder();
 
-        // code to compute the children
         computation.append(lhs.getComputation());
-        computation.append(rhs.getComputation());
 
         // code to compute self
         Type resType = types.getExprType(node);
         String resOllirType = ollirTypes.toOllirType(resType);
         String code = ollirTypes.nextTemp() + resOllirType;
 
-        computation.append(code).append(SPACE)
-                .append(ASSIGN).append(resOllirType).append(SPACE)
-                .append(lhs.getCode()).append(SPACE);
+        StringBuilder code_computation = new StringBuilder();
 
-        Type type = types.getExprType(node);
-        computation.append(node.get("op")).append(ollirTypes.toOllirType(type)).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
+        code_computation.append(code).append(SPACE)
+                .append(ASSIGN).append(resOllirType).append(SPACE);
+
+
+        if(op.equals("&&")){
+
+            boolean short_circuit = lhs.getCode().contains("false");
+            StringBuilder and_computation = new StringBuilder();
+
+            String tempAnd = ollirTypes.nextAnd();
+
+            StringBuilder and_assign = new StringBuilder();
+            and_assign.append(tempAnd).append(".bool").append(SPACE)
+                    .append(ASSIGN).append(resOllirType).append(SPACE);
+
+
+            String tempThen = ollirTypes.nextIf("then");
+            String tempEndif = ollirTypes.nextIf("endif");
+
+            // if the left-hand side of the operator evaluates to false, the right-hand side is not evaluated
+            and_computation.
+                    append("if").append(L_PARENTHESES).append("1.bool").append(R_PARENTHESES).
+                    append(SPACE).append(GOTO).append(SPACE).append(tempThen).append(END_STMT).
+
+                    append(and_assign).append("0.bool").append(END_STMT).
+                    append(GOTO).append(SPACE).append(tempEndif).append(END_STMT).
+                    append(tempThen).append(COLON).append("\n");
+
+            //Evaluates the right condition
+            var rhs = visit(node.getChild(1));
+            computation.append(rhs.getComputation());
+
+            and_computation.
+                    append(and_assign).append(rhs.getCode()).append(END_STMT).
+                    append(tempEndif).append(COLON).append("\n").
+                    append(code_computation).append(tempAnd).append(resOllirType).append(END_STMT);
+
+            computation.append(and_computation);
+        } else {
+
+            var rhs = visit(node.getChild(1));
+            computation.append(rhs.getComputation());
+
+            /* TODO: I guess in other cases we keep the same approach as before
+                - to be checked in the Jmm Compiler when possible */
+
+            computation.append(code_computation).append(lhs.getCode()).append(SPACE);
+
+            Type type = types.getExprType(node);
+            computation.append(node.get("op")).append(ollirTypes.toOllirType(type)).append(SPACE)
+                    .append(rhs.getCode()).append(END_STMT);
+
+        }
 
         return new OllirExprResult(code, computation);
     }

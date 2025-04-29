@@ -20,11 +20,11 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
 
     @Override
     protected void buildVisitor() {
+        addVisit(Kind.METHOD_DECL, this::visitMethod);
+        addVisit(Kind.WHILE_STMT, this::visitWhile);
         addVisit(Kind.VAR_ASSIGN_STMT, this::constantPropagation);
         addVisit(Kind.VAR_REF_EXPR, this::constantPropagation_varRef);
         addVisit(Kind.BINARY_EXPR, this::constantFolding);
-        addVisit(Kind.METHOD_DECL, this::visitMethod);
-        addVisit(Kind.WHILE_STMT, this::visitWhile);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -50,7 +50,6 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
         var lhs = node.getChild(0); // condition
 
 //        System.out.println("consts before -> " + constants);
-
 
         for (var assign : rhs.getDescendants(Kind.VAR_ASSIGN_STMT)) {
             var child = assign.getChild(0);

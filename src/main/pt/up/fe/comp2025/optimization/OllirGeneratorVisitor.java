@@ -153,12 +153,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitIfStmt(JmmNode node, Void unused){
         StringBuilder code = new StringBuilder();
-        OllirExprResult child = exprVisitor.visit(node.getChild(0));
+        OllirExprResult condition = exprVisitor.visit(node.getChild(0));
 
-        code.append(child.getComputation());
+        code.append(condition.getComputation());
         code.append(IF).append(SPACE).append(L_PARENTHESES);
 
-        code.append(child.getCode()).append(R_PARENTHESES).append(SPACE);
+        code.append(condition.getCode()).append(R_PARENTHESES).append(SPACE);
 
         //Get Else body Ollir Code
         var elseBody = visit(node.getChild(2));
