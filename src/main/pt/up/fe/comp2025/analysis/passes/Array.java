@@ -15,18 +15,48 @@ public class Array extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit(Kind.ARRAY_INIT_STMT, this::visitArrayInitStmt);
+        addVisit(Kind.NEW_ARRAY_EXPR, this::visitArrayInitStmt);
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
         addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
+        addVisit(Kind.ARRAY_ASSIGN_STMT, this::visitArrayAssign);
+    }
+
+    private Void visitArrayAssign (JmmNode node, SymbolTable symbolTable){
+
+        //Check capacity
+        var array_name = node.get("name");
+        var actualCapacity = arrayCapacities.get(array_name);
+
+        var index_node = node.getChild(0);
+        var indexAccessed = 0;
+
+        if (index_node.getKind().equals("IntegerLiteral")){
+            indexAccessed = Integer.valueOf(node.getChild(0).get("value"));
+        } else if (index_node.getKind().equals("VarRefExpr")) {
+            //TODO: handle this situation
+            indexAccessed = 2;
+        }
+
+        if (indexAccessed > actualCapacity - 1) {
+            addNewErrorReport(node, "Array has the capacity of  " + actualCapacity +
+                    " while " + indexAccessed + " is trying to be accessed.");
+            return null;
+        }
+
+
+        return null;
     }
 
     // Store the capacity of arrays when initialised
     private Void visitArrayInitStmt(JmmNode arrayInitStmt, SymbolTable symbolTable) {
-        JmmNode capacity = arrayInitStmt.getChild(1);
+        JmmNode capacity = arrayInitStmt.getChild(0);
 
-        String arrayName = arrayInitStmt.get("name");
+        //It is a VarAssignStmt
+        var parent = arrayInitStmt.getParent();
+        var array_name = parent.getChild(0).get("name");
+
         // Store the capacities of all initialised arrays
-        arrayCapacities.put(arrayName, Integer.valueOf(capacity.get("value")));
+        arrayCapacities.put(array_name, Integer.valueOf(capacity.get("value")));
 
 //        System.out.println(arrayCapacities);
 

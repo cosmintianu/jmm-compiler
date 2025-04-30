@@ -108,6 +108,9 @@ public class OptimizationsTest {
         OllirResult original = getOllirResult(filename);
         OllirResult optimized = getOllirResultOpt(filename);
 
+        System.out.println("origial -> " + original.getOllirCode());
+        System.out.println("optimized -> " + optimized.getOllirCode());
+
         CpUtils.assertNotEquals("Expected code to change with -o flag\n\nOriginal code:\n" + original.getOllirCode(),
                 original.getOllirCode(), optimized.getOllirCode(),
                 optimized);
