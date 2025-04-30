@@ -343,4 +343,52 @@ public class OllirTest {
         CpUtils.assertEquals("Number of array reads", 6, numArrayReads, result);
     }
 
+    /*
+     **************** EXTRA TESTS FOR OLLIR ********************
+     */
+
+    @Test
+    public void NewArrayExpr() {
+
+        var result = getOllirResult("own_ollir_tests/UnaryExpr.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ParentExpr() {
+
+        var result = getOllirResult("own_ollir_tests/ParentExpr.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ThisExpr() {
+
+        var result = getOllirResult("own_ollir_tests/ThisAssignment.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ArrayLiteral() {
+
+        var result = getOllirResult("own_ollir_tests/ArrayLiteral.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //No need to handle with varargs for now
+    @Test
+    public void Varargs() {
+
+        var result = getOllirResult("own_ollir_tests/Varargs.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void MethodInvocation() {
+
+        var result = getOllirResult("own_ollir_tests/MethodInvocation.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+
 }
