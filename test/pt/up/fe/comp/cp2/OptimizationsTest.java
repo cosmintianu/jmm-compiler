@@ -136,6 +136,7 @@ public class OptimizationsTest {
 
         var method = CpUtils.getMethod(optimized, "foo");
         CpUtils.assertLiteralCount("3", method, optimized, 3);
+        CpUtils.assertLiteralCount("0", method, optimized, 1);
     }
 
     @Test
