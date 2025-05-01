@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2025.ConfigOptions;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTableBuilder;
 
@@ -14,7 +16,6 @@ import java.util.*;
 public class JmmOptimizationImpl implements JmmOptimization {
 
     private OptimizationVisitor optimizationVisitor;
-    Map<String, Integer> varToRegister = new HashMap<>();
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
@@ -61,17 +62,28 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
+        Map<String, String> config = ollirResult.getConfig();
+        int registerAllocation = Integer.parseInt(config.getOrDefault("registerAllocation", "-1"));
+        List<Report> reports = new ArrayList<>();
+
+        // -1 means "use OLLIR virtual registers" — no optimization
+        if (registerAllocation == -1) {
+            return ollirResult;
+        }
 
         ClassUnit classUnit = ollirResult.getOllirClass();
 
+        classUnit.buildCFGs();
+
         for (Method method : classUnit.getMethods()) {
             method.buildCFG();
+//            System.out.println(method);
+//            System.out.println(method.getVarTable());
 
+            List<Instruction> instructions = method.getInstructions();
             Map<Instruction, Set<String>> in = new HashMap<>();
             Map<Instruction, Set<String>> out = new HashMap<>();
-            List<Instruction> instructions = method.getInstructions();
 
-            // Initialize maps
             for (Instruction instr : instructions) {
                 in.put(instr, new HashSet<>());
                 out.put(instr, new HashSet<>());
@@ -90,6 +102,9 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
                     Set<String> use = getUsedVariables(instr);
                     Set<String> def = getDefinedVariable(instr);
+//
+//                    System.out.println("USE: " + use);
+//                    System.out.println("DEF: " + def);
 
                     Set<String> newOut = new HashSet<>();
                     if (instr.getSucc1() instanceof Instruction succ1) {
@@ -111,7 +126,6 @@ public class JmmOptimizationImpl implements JmmOptimization {
                         changed = true;
                     }
                 }
-
             } while (changed);
 
             // Build interference graph
@@ -132,10 +146,14 @@ public class JmmOptimizationImpl implements JmmOptimization {
                 }
             }
 
-            // Graph coloring
-            Map<String, Integer> regMap = colorGraph(interferenceGraph);
+            // Perform coloring
+            Optional<Map<String, Integer>> optRegMap = colorGraph(interferenceGraph, registerAllocation, reports, method.getMethodName());
 
-            // Apply register allocation to varTable
+            // If failed, skip updating this method
+            if (optRegMap.isEmpty()) continue;
+
+            Map<String, Integer> regMap = optRegMap.get();
+
             for (Map.Entry<String, Descriptor> entry : method.getVarTable().entrySet()) {
                 String var = entry.getKey();
                 if (regMap.containsKey(var)) {
@@ -144,10 +162,16 @@ public class JmmOptimizationImpl implements JmmOptimization {
             }
         }
 
+        // Attach any errors to the result
+        ollirResult.getReports().addAll(reports);
         return ollirResult;
     }
 
-    private Map<String, Integer> colorGraph(Map<String, Set<String>> graph) {
+    private Optional<Map<String, Integer>> colorGraph(Map<String, Set<String>> graph,
+                                                      int maxRegisters,
+                                                      List<Report> reports,
+                                                      String methodName) {
+
         Map<String, Integer> colors = new HashMap<>();
         Stack<String> stack = new Stack<>();
         Map<String, Set<String>> copy = new HashMap<>();
@@ -156,91 +180,62 @@ public class JmmOptimizationImpl implements JmmOptimization {
             copy.put(entry.getKey(), new HashSet<>(entry.getValue()));
         }
 
+        int minRegistersRequired = 0;
+
+        // Simplify phase
         while (!copy.isEmpty()) {
-            String remove = null;
+            String nodeToRemove = null;
             for (String node : copy.keySet()) {
-                if (copy.get(node).size() < 1000) { // assuming infinite registers
-                    remove = node;
+                if (maxRegisters <= 0 || copy.get(node).size() < maxRegisters) {
+                    nodeToRemove = node;
                     break;
                 }
             }
 
-            if (remove == null) break;
+            if (nodeToRemove == null) {
+                for (String node : copy.keySet()) {
+                    minRegistersRequired = Math.max(minRegistersRequired, copy.get(node).size() + 1);
+                }
 
-            stack.push(remove);
-            for (String neighbor : copy.get(remove)) {
-                copy.get(neighbor).remove(remove);
+                reports.add(Report.newError(Stage.OPTIMIZATION, -1, -1, "Register allocation failed in method '" + methodName +
+                        "': requires at least " + minRegistersRequired +
+                        " registers, but only " + maxRegisters + " allowed.", null));
+                return Optional.empty();
             }
-            copy.remove(remove);
+
+            stack.push(nodeToRemove);
+            for (String neighbor : copy.get(nodeToRemove)) {
+                copy.get(neighbor).remove(nodeToRemove);
+            }
+            copy.remove(nodeToRemove);
         }
 
+        // Assign registers
         while (!stack.isEmpty()) {
             String var = stack.pop();
             Set<Integer> neighborColors = new HashSet<>();
+
             for (String neighbor : graph.getOrDefault(var, Set.of())) {
                 if (colors.containsKey(neighbor)) {
                     neighborColors.add(colors.get(neighbor));
                 }
             }
 
-            int color = 0;
-            while (neighborColors.contains(color)) color++;
-            colors.put(var, color);
+            int reg = 0;
+            while (neighborColors.contains(reg)) reg++;
+
+            if (maxRegisters > 0 && reg >= maxRegisters) {
+                reports.add(Report.newError(Stage.OPTIMIZATION, -1, -1, "Register allocation failed in method '" + methodName +
+                        "': requires at least " + (reg + 1) +
+                        " registers, but only " + maxRegisters + " allowed.", null));
+                return Optional.empty();
+            }
+
+            colors.put(var, reg);
         }
-
-        return colors;
+//        System.out.println("COLORS: " + methodName.);
+        return Optional.of(colors);
     }
-
-
-//    public Map<Integer, Set<String>> computeLiveness(Method method, ClassUnit classUnit) {
-//        Map<Instruction, Set<String>> in = new HashMap<>();
-//        Map<Instruction, Set<String>> out = new HashMap<>();
-//
-//        List<Instruction> instructions = method.getInstructions();
-//
-//        for (Instruction instruction : instructions) {
-//            in.put(instruction, new HashSet<>());
-//            out.put(instruction, new HashSet<>());
-//        }
-//
-//        boolean changed;
-//        do {
-//            changed = false;
-//
-//            for (int i = instructions.size() - 1; i >= 0; i--) {
-//                Instruction instr = instructions.get(i);
-//
-//                Set<String> oldIn = new HashSet<>(in.get(instr));
-//                Set<String> oldOut = new HashSet<>(out.get(instr));
-//
-//                Set<String> use = getUsedVariables(instr);
-//                Set<String> def = getUsedVariables(instr);
-//
-//                Set<String> newOut = new HashSet<>();
-//                if (instr.getSucc1() instanceof Instruction succ1) {
-//                    newOut.addAll(in.get(succ1));
-//                }
-//                if (instr.getSucc2() instanceof Instruction succ2) {
-//                    newOut.addAll(in.get(succ2));
-//                }
-//
-//                Set<String> newIn = new HashSet<>(use);
-//                Set<String> temp = new HashSet<>(newOut);
-//                temp.removeAll(def);
-//                newIn.addAll(temp);
-//
-//                in.put(instr, newIn);
-//                out.put(instr, newOut);
-//
-//                if (!newIn.equals(oldIn) || !newOut.equals(oldOut)) {
-//                    changed = true;
-//                }
-//            }
-//        } while (changed);
-//
-//
-//        return liveOut; // or liveIn if needed
-//    }
 
     private Set<String> getUsedVariables(Instruction instr) {
         Set<String> used = new HashSet<>();
@@ -297,7 +292,6 @@ public class JmmOptimizationImpl implements JmmOptimization {
         return used;
     }
 
-
     private Set<String> getDefinedVariable(Instruction instr) {
         Set<String> def = new HashSet<>();
         if (instr instanceof AssignInstruction assign) {
@@ -308,6 +302,5 @@ public class JmmOptimizationImpl implements JmmOptimization {
         }
         return def;
     }
-
 }
 
