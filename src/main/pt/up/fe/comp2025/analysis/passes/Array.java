@@ -15,7 +15,7 @@ public class Array extends AnalysisVisitor {
 
     @Override
     protected void buildVisitor() {
-        addVisit(Kind.NEW_ARRAY_EXPR, this::visitArrayInitStmt);
+        addVisit(Kind.ARRAY_INIT_STMT, this::visitArrayInitStmt);
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
         addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
         addVisit(Kind.ARRAY_ASSIGN_STMT, this::visitArrayAssign);
@@ -26,7 +26,9 @@ public class Array extends AnalysisVisitor {
         //Check capacity
         var array_name = node.get("name");
         var actualCapacity = arrayCapacities.get(array_name);
-
+        if (actualCapacity == null) {
+            return null;
+        }
         var index_node = node.getChild(0);
         var indexAccessed = 0;
 
