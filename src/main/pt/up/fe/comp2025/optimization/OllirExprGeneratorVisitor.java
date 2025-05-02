@@ -450,6 +450,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var booleanType = new Type("boolean", false);
         String ollirBooleanType = ollirTypes.toOllirType(booleanType);
 
+        System.out.println(node);
+
         var bool_name = node.get("name").equals("true") ? 1 : 0;
 
         String code = bool_name + ollirBooleanType;

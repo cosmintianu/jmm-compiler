@@ -172,6 +172,21 @@ public class OptimizationsTest {
         CpUtils.assertFindLiteral("14", method, optimized);
     }
 
+    //To use it it is need to change BASE_PATH, but is working ;)
+//    @Test
+//    public void Arithmetic_and() {
+//
+//        String filename = "/ollir/arithmetic/Arithmetic_and.jmm";
+//
+//        var original = getOllirResult(filename);
+//        var optimized = getOllirResultOpt(filename);
+//
+//
+//        CpUtils.assertTrue("Expected code to change with -o flag\n\nOriginal code:\n" + original.getOllirCode(),
+//                !original.getOllirCode().equals(optimized.getOllirCode()), optimized);
+//
+//    }
+
     @Test
     public void constPropAnFoldSimple() {
 

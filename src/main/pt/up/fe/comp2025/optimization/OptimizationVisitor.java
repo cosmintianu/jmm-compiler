@@ -169,7 +169,10 @@ public class OptimizationVisitor extends PreorderJmmVisitor<SymbolTable, Void> {
             List<String> kindHierarchy = List.of(bool_or_int);
             JmmNode replacement = new JmmNodeImpl(kindHierarchy);
 
-            replacement.put("value", val);
+            if (bool_or_int.equals("IntegerLiteral"))
+                replacement.put("value", val);
+            else
+                replacement.put("name", val);
 
             if (!node.getParent().getKind().equals("VarAssignStmt")){
                 opt = true;
