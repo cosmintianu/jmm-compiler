@@ -8,6 +8,7 @@ import org.specs.comp.ollir.OperationType;
 import org.specs.comp.ollir.inst.*;
 import org.specs.comp.ollir.type.BuiltinKind;
 import pt.up.fe.comp.CpUtils;
+import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
 
@@ -25,6 +26,11 @@ public class OllirTest {
     static OllirResult getOllirResult(String filename) {
         return CpUtils.getOllirResult(SpecsIo.getResource(BASE_PATH + filename), Collections.emptyMap(), false);
     }
+
+    static OllirResult getOllirResult2(String filename) {
+        return CpUtils.getOllirResult(SpecsIo.getResource("pt/up/fe/comp/cp1/" + filename), Collections.emptyMap(), false);
+    }
+
 
     public void compileBasic(ClassUnit classUnit) {
         // Test name of the class and super
@@ -389,6 +395,146 @@ public class OllirTest {
         var result = getOllirResult("own_ollir_tests/MethodInvocation.jmm");
         System.out.println(result.getOllirCode());
     }
+
+    @Test
+    public void VarNotDeclared3() {
+
+        var result = getOllirResult2("ownsemanticanalysis/VarNotDeclared3.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void varNotDeclared4() {
+        var result = getOllirResult2("ownsemanticanalysis/VarNotDeclared4.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void varNotDeclared5() {
+        var result = getOllirResult2("ownsemanticanalysis/VarNotDeclared5.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void AssignIntToInt() {
+        var result = getOllirResult2("ownsemanticanalysis/AssignIntToInt.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void WhileLoop() {
+        var result = getOllirResult2("ownsemanticanalysis/WhileLoop.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ImportJavaio() {
+        var result = getOllirResult2("ownsemanticanalysis/ImportJavaio.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+
+    @Test
+    public void MathOperations() {
+        var result = getOllirResult2("ownsemanticanalysis/MathOperations.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void ImportAndFieldAccess() {
+        var result = getOllirResult2("ownsemanticanalysis/ImportAndFieldAccess.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ChainedMethod() {
+        var result = getOllirResult2("ownsemanticanalysis/ChainedMethod.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void FieldAssign() {
+        var result = getOllirResult2("ownsemanticanalysis/FieldAssign.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void InstanceVariable() {
+        var result = getOllirResult2("ownsemanticanalysis/InstanceVariable.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void ReturnArrayCorrect() {
+        var result = getOllirResult2("ownsemanticanalysis/ReturnArrayCorrect.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void CompatibleArguments() {
+        var result = getOllirResult2("ownsemanticanalysis/CompatibleArguments.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //I guess we should have a semantic error here
+    @Test
+    public void WhileLoop2() {
+        var result = getOllirResult2("ownsemanticanalysis/WhileLoop2.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void String() {
+        var result = getOllirResult2("ownsemanticanalysis/String.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void AssignValueToInt() {
+        var result = getOllirResult2("ownsemanticanalysis/AssignValueToInt.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void WhileAndIf() {
+        var result = getOllirResult2("ownsemanticanalysis/WhileAndIf.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Still to be tested
+//    @Test
+//    public void MethodImport() {
+//        var result = getOllirResult2("ownsemanticanalysis/MethodImport.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
+//
+//    //Not sure If it should pass or not :c What do you think?
+//    @Test
+//    public void CreateInstance() {
+//        var result = getOllirResult2("ownsemanticanalysis/CreateInstance.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
+//
+//    @Test
+//    public void ThisAssignment() {
+//        var result = getOllirResult2("ownsemanticanalysis/ThisAssignment.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
+//
+//    @Test
+//    public void ThisAssignmentExtends() {
+//        var result = getOllirResult2("ownsemanticanalysis/ThisAssignmentExtends.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
+//
+//    @Test
+//    public void BasicMethodInvocation() {
+//        var result = getOllirResult2("ownsemanticanalysis/BasicMethodInvocation.jmm");
+//        System.out.println(result.getOllirCode());
+//    }
 
 
 }

@@ -108,8 +108,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitWhileStmt(JmmNode node, Void unused){
         StringBuilder code = new StringBuilder();
 
+        var condition = node.getChild(0);
+
+        var whileCondition = exprVisitor.visit(condition);
+        var whileBody = visit(node.getChild(1));
+
         var tempWhile = ollirTypes.nextWhile();
-        var whileCondition = exprVisitor.visit(node.getChild(0));
 
         code.append(tempWhile);
         code.append(COLON);
@@ -131,9 +135,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(SPACE);
         code.append(tempEndif);
         code.append(END_STMT);
-
-        //While body
-        var whileBody = visit(node.getChild(1));
 
         code.append(whileBody).append(NL);
         code.append(GOTO);
