@@ -121,8 +121,20 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private OllirExprResult visitThisExpr(JmmNode node, Void unused){
 
-        Type parent_type = types.getExprType(node.getParent().getChild(0));
-        String ollirType = ollirTypes.toOllirType(parent_type);
+        var parent = node.getParent();
+        Type parent_type;
+        String ollirType;
+
+        //Check ReturnStmt case
+        if (parent.getKind().equals("ReturnStmt")) {
+            JmmNode method = node.getAncestor(METHOD_DECL).get();
+            var nameMethod = method.get("nameMethod");
+            var retType = table.getReturnType(nameMethod);
+            ollirType = ollirTypes.toOllirType(retType);
+        } else {
+            parent_type = types.getExprType(parent.getChild(0));
+            ollirType = ollirTypes.toOllirType(parent_type);
+        }
 
         String code = node.get("name") + ollirType;
 

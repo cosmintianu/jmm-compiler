@@ -440,13 +440,6 @@ public class OllirTest {
         System.out.println(result.getOllirCode());
     }
 
-    //Possible problem here!!
-    @Test
-    public void ImportAndFieldAccess() {
-        var result = getOllirResult2("ownsemanticanalysis/ImportAndFieldAccess.jmm");
-        System.out.println(result.getOllirCode());
-    }
-
     @Test
     public void ChainedMethod() {
         var result = getOllirResult2("ownsemanticanalysis/ChainedMethod.jmm");
@@ -456,13 +449,6 @@ public class OllirTest {
     @Test
     public void FieldAssign() {
         var result = getOllirResult2("ownsemanticanalysis/FieldAssign.jmm");
-        System.out.println(result.getOllirCode());
-    }
-
-    //Possible problem here!!
-    @Test
-    public void InstanceVariable() {
-        var result = getOllirResult2("ownsemanticanalysis/InstanceVariable.jmm");
         System.out.println(result.getOllirCode());
     }
 
@@ -485,13 +471,6 @@ public class OllirTest {
         System.out.println(result.getOllirCode());
     }
 
-    //Possible problem here!!
-    @Test
-    public void String() {
-        var result = getOllirResult2("ownsemanticanalysis/String.jmm");
-        System.out.println(result.getOllirCode());
-    }
-
     @Test
     public void AssignValueToInt() {
         var result = getOllirResult2("ownsemanticanalysis/AssignValueToInt.jmm");
@@ -504,37 +483,58 @@ public class OllirTest {
         System.out.println(result.getOllirCode());
     }
 
-    //Still to be tested
-//    @Test
-//    public void MethodImport() {
-//        var result = getOllirResult2("ownsemanticanalysis/MethodImport.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
-//
-//    //Not sure If it should pass or not :c What do you think?
-//    @Test
-//    public void CreateInstance() {
-//        var result = getOllirResult2("ownsemanticanalysis/CreateInstance.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
-//
-//    @Test
-//    public void ThisAssignment() {
-//        var result = getOllirResult2("ownsemanticanalysis/ThisAssignment.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
-//
-//    @Test
-//    public void ThisAssignmentExtends() {
-//        var result = getOllirResult2("ownsemanticanalysis/ThisAssignmentExtends.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
-//
-//    @Test
-//    public void BasicMethodInvocation() {
-//        var result = getOllirResult2("ownsemanticanalysis/BasicMethodInvocation.jmm");
-//        System.out.println(result.getOllirCode());
-//    }
 
+    @Test
+    public void MethodImport() {
+        var result = getOllirResult2("ownsemanticanalysis/MethodImport.jmm");
+        System.out.println(result.getOllirCode());
+    }
 
+    @Test
+    public void ThisAssignment() {
+        var result = getOllirResult2("ownsemanticanalysis/ThisAssignment.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void BasicMethodInvocation() {
+        var result = getOllirResult2("ownsemanticanalysis/BasicMethodInvocation.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    @Test
+    public void CreateInstance() {
+        var result = getOllirResult2("ownsemanticanalysis/CreateInstance.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //**************** To be reviewed *******************
+
+    //Também precisa de algum ajuste
+    @Test
+    public void ThisAssignmentExtends() {
+        var result = getOllirResult2("ownsemanticanalysis/ThisAssignmentExtends.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void String() {
+        var result = getOllirResult2("ownsemanticanalysis/String.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void InstanceVariable() {
+        var result = getOllirResult2("ownsemanticanalysis/InstanceVariable.jmm");
+        System.out.println(result.getOllirCode());
+    }
+
+    //Possible problem here!!
+    @Test
+    public void ImportAndFieldAccess() {
+        var result = getOllirResult2("ownsemanticanalysis/ImportAndFieldAccess.jmm");
+        System.out.println(result.getOllirCode());
+    }
 }
