@@ -253,7 +253,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getComputation());
 
         var lhs = node.getChild(0);
-        OllirExprResult lhsResult = exprVisitor.visit(lhs);
     
         Type lhsType = types.getExprType(lhs);
         String ollirLhsType = ollirTypes.toOllirType(lhsType);
@@ -266,6 +265,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     
         if (lhs.isInstance(INDEX_ACCESS_EXPR)) {
             // Array store
+            OllirExprResult lhsResult = exprVisitor.visit(lhs);
+
             code.append(lhsResult.getCode())
                 .append(SPACE)
                 .append(ASSIGN)
@@ -293,6 +294,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     
         } else {
             // Local variable or parameter store
+            OllirExprResult lhsResult = exprVisitor.visit(lhs);
+
             code.append(lhsResult.getCode())
                 .append(SPACE)
                 .append(ASSIGN)
