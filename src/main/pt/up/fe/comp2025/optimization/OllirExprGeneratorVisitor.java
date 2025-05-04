@@ -126,7 +126,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String ollirType;
 
         //Check ReturnStmt case
-        if (parent.getKind().equals("ReturnStmt")) {
+        if (parent.getKind().contains("Stmt")) {
             JmmNode method = node.getAncestor(METHOD_DECL).get();
             var nameMethod = method.get("nameMethod");
             var retType = table.getReturnType(nameMethod);
@@ -480,6 +480,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         computation.append(lhs.getComputation());
 
+        OllirExprResult rhs = visit(node.getChild(1));
+
         // code to compute self
         Type resType = types.getExprType(node);
         String resOllirType = ollirTypes.toOllirType(resType);
@@ -516,7 +518,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     append(tempThen).append(COLON).append("\n");
 
             //Evaluates the right condition
-            var rhs = visit(node.getChild(1));
             computation.append(rhs.getComputation());
 
             and_computation.
@@ -527,12 +528,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             computation.append(and_computation);
         } else {
 
-            var rhs = visit(node.getChild(1));
             computation.append(rhs.getComputation());
-
-            /* TODO: I guess in other cases we keep the same approach as before
-                - to be checked in the Jmm Compiler when possible */
-
             computation.append(code_computation).append(lhs.getCode()).append(SPACE);
 
             Type type = types.getExprType(node);

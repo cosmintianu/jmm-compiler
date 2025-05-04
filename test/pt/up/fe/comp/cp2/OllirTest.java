@@ -508,33 +508,28 @@ public class OllirTest {
         System.out.println(result.getOllirCode());
     }
 
-    //**************** To be reviewed *******************
-
-    //Também precisa de algum ajuste
     @Test
     public void ThisAssignmentExtends() {
         var result = getOllirResult2("ownsemanticanalysis/ThisAssignmentExtends.jmm");
         System.out.println(result.getOllirCode());
     }
 
-    //Possible problem here!!
     @Test
     public void String() {
         var result = getOllirResult2("ownsemanticanalysis/String.jmm");
         System.out.println(result.getOllirCode());
     }
 
-    //Possible problem here!!
     @Test
     public void InstanceVariable() {
         var result = getOllirResult2("ownsemanticanalysis/InstanceVariable.jmm");
         System.out.println(result.getOllirCode());
     }
 
-    //Possible problem here!!
     @Test
     public void ImportAndFieldAccess() {
         var result = getOllirResult2("ownsemanticanalysis/ImportAndFieldAccess.jmm");
         System.out.println(result.getOllirCode());
     }
+
 }
