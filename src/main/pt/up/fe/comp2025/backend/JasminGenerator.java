@@ -216,6 +216,17 @@ public class JasminGenerator {
         code.append(apply(binaryOp.getLeftOperand()));
         code.append(apply(binaryOp.getRightOperand()));
 
+        //Optimizations request
+        boolean comparasionToZero = false;
+
+        //If left op is a comparasion and the right argument equals zero, condition is true
+        switch (binaryOp.getOperation().getOpType()) {
+            case LTH, GTH -> {
+                if (binaryOp.getRightOperand().equals("0"))
+                    comparasionToZero = true;
+            }
+        }
+
         // TODO: Hardcoded for int type, needs to be expanded
         var typePrefix = "i";
 
@@ -223,6 +234,14 @@ public class JasminGenerator {
         var op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "add";
             case MUL -> "mul";
+            case SUB -> "sub";
+            case DIV -> "div";
+            case LTH -> "iflt"; //if less than
+            case GTH -> "ifgt"; //if greater than
+            //For booleans
+            case ANDB -> "and";
+            case ORB -> "or";
+            case NOTB -> "not";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
@@ -240,3 +259,28 @@ public class JasminGenerator {
         return code.toString();
     }
 }
+
+
+// ********* Binary Op - Operation Type Class *************
+
+//        ADD,
+//        SUB,
+//        MUL,
+//        DIV,
+//        REM, remainder
+//        SHR, shif right
+//        SHL, shift lef
+//        SHRR,  shift tbm
+//        XOR, nn tem na gramatica
+//        AND, &
+//        OR,
+//        LTH, <
+//        GTH, >
+//        EQ, ==
+//        NEQ, !=
+//        LTE, <=
+//        GTE, >=
+//        ANDB, && - booleanos
+//        ORB, ||
+//        NOTB, !
+//        NOT; ~ -- Inverter todos os bits
