@@ -220,7 +220,7 @@ public class OllirTest {
     @Test
     public void arithmeticSimpleAdd() {
         var ollirResult = getOllirResult("arithmetic/Arithmetic_add.jmm");
-
+        System.out.println(ollirResult.getOllirCode());
         compileArithmetic(ollirResult.getOllirClass());
     }
 

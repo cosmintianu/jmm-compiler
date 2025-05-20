@@ -1,4 +1,6 @@
-Test {
+import io.A;
+
+Test extends A {
 
 	.construct Test().V {
 		invokespecial(this, "<init>").V;

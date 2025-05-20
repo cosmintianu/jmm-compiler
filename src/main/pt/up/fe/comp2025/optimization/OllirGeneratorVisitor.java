@@ -452,19 +452,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 """.formatted(table.getClassName());
     }
 
-    //Handle kind ImportDecl
+    //Now the imports are add in the visitProgram
     private String visitImport(JmmNode node, Void unused) {
-
-        StringBuilder code = new StringBuilder();
-        code.append("import").append(SPACE).append(node.get("ID")).append(END_STMT);
-
-        return code.toString();
+        return "";
     }
 
 
     private String visitProgram(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder();
+
+        code.append("import").append(SPACE);
+
+        var imports = table.getImports();
+        for (int i = 0; i < imports.size(); i++) {
+            code.append(imports.get(i));
+        }
+        code.append(END_STMT);
 
         node.getChildren().stream()
                 .map(this::visit)

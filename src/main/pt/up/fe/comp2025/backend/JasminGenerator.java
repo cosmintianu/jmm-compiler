@@ -1,14 +1,9 @@
 package pt.up.fe.comp2025.backend;
 
-import org.specs.comp.ollir.ClassUnit;
-import org.specs.comp.ollir.LiteralElement;
-import org.specs.comp.ollir.Method;
-import org.specs.comp.ollir.Operand;
-import org.specs.comp.ollir.inst.AssignInstruction;
-import org.specs.comp.ollir.inst.BinaryOpInstruction;
-import org.specs.comp.ollir.inst.ReturnInstruction;
-import org.specs.comp.ollir.inst.SingleOpInstruction;
+import org.specs.comp.ollir.*;
+import org.specs.comp.ollir.inst.*;
 import org.specs.comp.ollir.tree.TreeNode;
+import org.specs.comp.ollir.type.Type;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
@@ -16,7 +11,9 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -36,10 +33,12 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    int currentStack;
 
     private final JasminUtils types;
 
     private final FunctionClassMap<TreeNode, String> generators;
+    private Map<String, String> imports_map = new HashMap<>();
 
     public JasminGenerator(OllirResult ollirResult) {
         this.ollirResult = ollirResult;
@@ -59,6 +58,8 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(NewInstruction.class, this::generateNewInstruction);
+        generators.put(InvokeSpecialInstruction.class, this::generateInvokeSpecial);
     }
 
     private String apply(TreeNode node) {
@@ -87,6 +88,10 @@ public class JasminGenerator {
         return code;
     }
 
+    private void updateStack(int value) {
+        currentStack+=value;
+    }
+
 
     private String generateClassUnit(ClassUnit classUnit) {
 
@@ -98,6 +103,19 @@ public class JasminGenerator {
 
         // TODO: When you support 'extends', this must be updated
         var fullSuperClass = "java/lang/Object";
+
+        //Build imports table
+        for (String entry : ollirResult.getOllirClass().getImports()){
+            var import_parts = entry.split("\\.");
+            imports_map.put(import_parts[import_parts.length -1],entry.replace(".","/"));
+        }
+
+        if (classUnit.getSuperClass() != null) {
+
+            var superClass = classUnit.getSuperClass();
+            fullSuperClass = imports_map.get(superClass);
+
+        }
 
         code.append(".super ").append(fullSuperClass).append(NL);
 
@@ -133,6 +151,7 @@ public class JasminGenerator {
         //System.out.println("STARTING METHOD " + method.getMethodName());
         // set method
         currentMethod = method;
+        currentStack = 0;
 
         var code = new StringBuilder();
 
@@ -169,6 +188,7 @@ public class JasminGenerator {
     }
 
     private String generateAssign(AssignInstruction assign) {
+
         var code = new StringBuilder();
 
         // generate code for loading what's on the right
@@ -228,6 +248,8 @@ public class JasminGenerator {
         }
 
         // TODO: Hardcoded for int type, needs to be expanded
+        var type = binaryOp.getLeftOperand().getType();
+
         var typePrefix = "i";
 
         // apply operation
@@ -253,9 +275,37 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: Hardcoded for int type, needs to be expanded
-        code.append("ireturn").append(NL);
+        String returnType = returnInst.getReturnType().toString();
 
+        switch (returnType) {
+            case "INT32", "BOOLEAN" -> {
+                //code.append(generators.apply(returnInst.getOperand()));
+                updateStack(-1);
+                code.append("ireturn").append(NL);
+            }
+//            case "OBJECTREF", "ARRAYREF", "STRING", "THIS", -> {
+//                code.append(generators.apply(returnInst.getOperand()));
+//                updateStack(-1);
+//                code.append("areturn").append(NL);
+//            }
+            case "VOID" -> code.append("return").append(NL);
+        }
+
+        return code.toString();
+    }
+
+    private String generateNewInstruction(NewInstruction newInst) {
+        var code = new StringBuilder();
+
+        code.append("GenerateNew").append(NL);
+
+        return code.toString();
+    }
+
+    private String generateInvokeSpecial(InvokeSpecialInstruction invokeSpecial) {
+        var code = new StringBuilder();
+
+        code.append("InvokeSpecial").append(NL);
         return code.toString();
     }
 }
