@@ -25,6 +25,7 @@ public class JasminGenerator {
 
     private static final String NL = "\n";
     private static final String TAB = "   ";
+    private static final String SPACE = " ";
 
     private final OllirResult ollirResult;
 
@@ -60,6 +61,7 @@ public class JasminGenerator {
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(NewInstruction.class, this::generateNewInstruction);
         generators.put(InvokeSpecialInstruction.class, this::generateInvokeSpecial);
+        generators.put(Field.class, this::generateField);
     }
 
     private String apply(TreeNode node) {
@@ -92,6 +94,28 @@ public class JasminGenerator {
         currentStack+=value;
     }
 
+    private String getJasminType(Type type) {
+
+        String operand_type = "I";
+
+//        if (type instanceof OperandType INT32){
+//            operand_type = "I";
+//        }
+//
+//        switch (type){
+//            case INT32 -> operand_type = "I";
+//            case BOOLEAN -> operand_type = "Z";
+//            case VOID -> operand_type = "V";
+//            case STRING -> operand_type = "Ljava/lang/String;";
+//            //TODO: not sure about those two
+////            case ARRAYREF -> operand_type = "[";
+////            case OBJECTREF -> operand_type = "Ljava/lang/Object;";
+//            case THIS -> operand_type = "L" + currentMethod.getOllirClass().getClassName() + ";";
+//        }
+
+
+        return operand_type;
+    }
 
     private String generateClassUnit(ClassUnit classUnit) {
 
@@ -101,7 +125,6 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL).append(NL);
 
-        // TODO: When you support 'extends', this must be updated
         var fullSuperClass = "java/lang/Object";
 
         //Build imports table
@@ -118,6 +141,11 @@ public class JasminGenerator {
         }
 
         code.append(".super ").append(fullSuperClass).append(NL);
+
+        //Append fields
+        for (var field : ollirResult.getOllirClass().getFields()) {
+            code.append(generators.apply(field));
+        }
 
         // generate a single constructor method
         var defaultConstructor = """
@@ -306,6 +334,24 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         code.append("InvokeSpecial").append(NL);
+        return code.toString();
+    }
+
+    private String generateField(Field field) {
+        var code = new StringBuilder();
+        code.append(".field").append(SPACE);
+
+        switch (field.getFieldAccessModifier()){
+            case PUBLIC -> code.append("public");
+            case PRIVATE -> code.append("private");
+            case PROTECTED -> code.append("protected");
+            case DEFAULT -> code.append("default");
+        }
+
+        //TODO: still needs to transform Type into JasminType - getJasminType is in progress
+        code.append(SPACE).append("'").append(field.getFieldName()).append("'").
+            append(SPACE).append((field.getFieldType())).append(NL);
+
         return code.toString();
     }
 }
