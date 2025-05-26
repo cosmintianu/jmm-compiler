@@ -36,7 +36,6 @@ public class JasminGenerator {
 
     Method currentMethod;
     int currentStack;
-    int limitStack;
 
     private final JasminUtils types;
 
@@ -90,10 +89,6 @@ public class JasminGenerator {
         }
 
         return code;
-    }
-
-    private void updateStack(int value) {
-        currentStack+=value;
     }
 
     private String getJasminType(Type type) {
@@ -204,7 +199,6 @@ public class JasminGenerator {
         // set method
         currentMethod = method;
         currentStack = 0;
-        limitStack = 0;
 
         var code = new StringBuilder();
 
@@ -248,7 +242,7 @@ public class JasminGenerator {
         int local = locals.size();
 
         // Add limits
-        code.append(TAB).append(".limit stack ").append(limitStack).append(NL);
+        code.append(TAB).append(".limit stack ").append(Math.max(0, currentStack)).append(NL);
         code.append(TAB).append(".limit locals ").append(local).append(NL);
 
         code.append(instructions).append(".end method\n");
@@ -258,6 +252,36 @@ public class JasminGenerator {
         //System.out.println("ENDING METHOD " + method.getMethodName());
         return code.toString();
     }
+
+    private String getStoreType(Operand operand) {
+
+        var code = new StringBuilder();
+        String operandName = operand.getName();
+        Type operandType = operand.getType();
+
+        if (operandType instanceof ArrayType) {
+            code.append("iastore").append(NL);
+            currentStack -= 3;
+            return code.toString();
+        }
+
+        else {
+            var regName = currentMethod.getVarTable().get(operandName);
+            var reg = regName.getVirtualReg();
+            var regType = regName.getVarType();
+
+            if (regType instanceof BuiltinType) {
+                code.append("istore_").append(reg).append(NL);
+            }
+            else {
+                code.append("astore_").append(reg).append(NL);
+            }
+            currentStack--;
+        }
+
+        return code.toString();
+    }
+
 
     private String generateAssign(AssignInstruction assign) {
 
@@ -280,7 +304,8 @@ public class JasminGenerator {
 
 
         // TODO: Hardcoded for int type, needs to be expanded
-        code.append("istore ").append(reg.getVirtualReg()).append(NL);
+        String store = getStoreType(operand);
+        code.append(store).append(NL);
 
         return code.toString();
     }
@@ -352,12 +377,12 @@ public class JasminGenerator {
         switch (returnType) {
             case "INT32", "BOOLEAN" -> {
                 //code.append(generators.apply(returnInst.getOperand()));
-                updateStack(-1);
+                currentStack--;
                 code.append("ireturn").append(NL);
             }
 //            case "OBJECTREF", "ARRAYREF", "STRING", "THIS", -> {
 //                code.append(generators.apply(returnInst.getOperand()));
-//                updateStack(-1);
+//                currentStack--;
 //                code.append("areturn").append(NL);
 //            }
             case "VOID" -> code.append("return").append(NL);
@@ -384,7 +409,7 @@ public class JasminGenerator {
         else if (caller instanceof ClassType classType){
             var className = imports_map.getOrDefault(classType.getName(), classType.getName());
             code.append("new ").append(className).append(NL);
-            limitStack++;
+            currentStack++;
         }
 
         return code.toString();
@@ -408,9 +433,8 @@ public class JasminGenerator {
             case DEFAULT -> code.append("default");
         }
 
-        //TODO: still needs to transform Type into JasminType - getJasminType is in progress
         code.append(SPACE).append("'").append(field.getFieldName()).append("'").
-            append(SPACE).append((field.getFieldType())).append(NL);
+            append(SPACE).append(getJasminType(field.getFieldType())).append(NL);
 
         return code.toString();
     }
