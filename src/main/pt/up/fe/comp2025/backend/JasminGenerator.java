@@ -3,17 +3,18 @@ package pt.up.fe.comp2025.backend;
 import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.inst.*;
 import org.specs.comp.ollir.tree.TreeNode;
+import org.specs.comp.ollir.type.ArrayType;
+import org.specs.comp.ollir.type.BuiltinType;
+import org.specs.comp.ollir.type.ClassType;
 import org.specs.comp.ollir.type.Type;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2025.JavammParser;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,7 @@ public class JasminGenerator {
 
     Method currentMethod;
     int currentStack;
+    int limitStack;
 
     private final JasminUtils types;
 
@@ -96,23 +98,45 @@ public class JasminGenerator {
 
     private String getJasminType(Type type) {
 
-        String operand_type = "I";
+        String operand_type = "";
 
-//        if (type instanceof OperandType INT32){
-//            operand_type = "I";
-//        }
-//
-//        switch (type){
-//            case INT32 -> operand_type = "I";
-//            case BOOLEAN -> operand_type = "Z";
-//            case VOID -> operand_type = "V";
-//            case STRING -> operand_type = "Ljava/lang/String;";
-//            //TODO: not sure about those two
-////            case ARRAYREF -> operand_type = "[";
-////            case OBJECTREF -> operand_type = "Ljava/lang/Object;";
-//            case THIS -> operand_type = "L" + currentMethod.getOllirClass().getClassName() + ";";
-//        }
+        if (type instanceof BuiltinType builtinType){
+            switch (builtinType.getKind()){
+                case INT32 -> operand_type = "I";
+                case BOOLEAN -> operand_type = "Z";
+                case VOID -> operand_type = "V";
+                case STRING -> operand_type = "Ljava/lang/String;";
+            }
+        }
+        //TODO: to be reviewed
+        else if (type instanceof ArrayType arrayType) {
+            var elementType = getJasminType(arrayType.getElementType());
+            //var numDimensions = arrayType.getNumDimensions(); -- We just have one dimension
+            operand_type = "[" + elementType;
+        }
+        else if (type instanceof ClassType classType) {
+            switch (classType.getKind()){
+                case CLASS -> operand_type = "L" + currentMethod.getClass().getName().toLowerCase() + ";";
+                case OBJECTREF -> operand_type = "Ljava/lang/Object;";
+                case THIS -> operand_type = "L" + currentMethod.getOllirClass().getClassName() + ";";
+            }
+        }
 
+        return operand_type;
+    }
+
+    private String getType(Type type) {
+
+        String operand_type = "";
+
+        if (type instanceof ArrayType arrayType) {
+            operand_type = "..";
+        }
+        else if (type instanceof ClassType classType) {
+            switch (classType.getKind()){
+                case CLASS, OBJECTREF -> operand_type = currentMethod.getClass().getName().toLowerCase();
+            }
+        }
 
         return operand_type;
     }
@@ -140,7 +164,7 @@ public class JasminGenerator {
 
         }
 
-        code.append(".super ").append(fullSuperClass).append(NL);
+        code.append(".super ").append(fullSuperClass).append(NL).append(NL);
 
         //Append fields
         for (var field : ollirResult.getOllirClass().getFields()) {
@@ -180,6 +204,7 @@ public class JasminGenerator {
         // set method
         currentMethod = method;
         currentStack = 0;
+        limitStack = 0;
 
         var code = new StringBuilder();
 
@@ -188,26 +213,45 @@ public class JasminGenerator {
 
         var methodName = method.getMethodName();
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        var params = "I";
+        if (method.isStaticMethod()) {
+            modifier += "static ";
+        }
+
+        //Append params
+        StringBuilder params = new StringBuilder();
+        for (var param : method.getParams()) {
+            params.append(getJasminType(param.getType()));
+        }
+
+        //Define Return Jasmin Type
         var returnType = "I";
+        //TODO: get return using this function is the correct way I think
+        // var returnType = generateReturn();
 
         code.append("\n.method ").append(modifier)
                 .append(methodName)
                 .append("(" + params + ")" + returnType).append(NL);
 
-        // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
-
+        StringBuilder instructions = new StringBuilder();
         for (var inst : method.getInstructions()) {
             var instCode = StringLines.getLines(apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
-            code.append(instCode);
+            instructions.append(instCode);
         }
 
-        code.append(".end method\n");
+        //Calculate Locals
+        HashSet<Integer> locals = new HashSet<>();
+        for( var key: method.getVarTable().keySet()){
+            locals.add(method.getVarTable().get(key).getVirtualReg());
+        }
+        int local = locals.size();
+
+        // Add limits
+        code.append(TAB).append(".limit stack ").append(limitStack).append(NL);
+        code.append(TAB).append(".limit locals ").append(local).append(NL);
+
+        code.append(instructions).append(".end method\n");
 
         // unset method
         currentMethod = null;
@@ -323,9 +367,25 @@ public class JasminGenerator {
     }
 
     private String generateNewInstruction(NewInstruction newInst) {
-        var code = new StringBuilder();
+        StringBuilder code = new StringBuilder();
 
-        code.append("GenerateNew").append(NL);
+        var caller = newInst.getCaller().getType();
+        if(caller instanceof ArrayType arrayType){
+
+            //Implemented on Array Semantics also
+            if(newInst.getArguments().size() < 1){
+                throw new IllegalArgumentException();
+            }
+
+            code.append(apply(newInst.getArguments().get(0)));
+            code.append("newarray int").append(NL);
+        }
+
+        else if (caller instanceof ClassType classType){
+            var className = imports_map.getOrDefault(classType.getName(), classType.getName());
+            code.append("new ").append(className).append(NL);
+            limitStack++;
+        }
 
         return code.toString();
     }

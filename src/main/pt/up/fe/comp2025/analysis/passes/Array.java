@@ -29,6 +29,11 @@ public class Array extends AnalysisVisitor {
         if (actualCapacity == null) {
             return null;
         }
+
+        if (actualCapacity == 0){
+            addNewErrorReport(node, "Array cannot have defined capacity of zero");
+        }
+
         var index_node = node.getChild(0);
         var indexAccessed = 0;
 
