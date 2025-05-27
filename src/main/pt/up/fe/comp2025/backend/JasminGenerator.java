@@ -301,7 +301,24 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        return "ldc " + literal.getLiteral() + NL;
+
+        var integerValue = Integer.parseInt(literal.getLiteral());
+
+        //sipush when the constant fits in a short
+        if (integerValue >= -1 && integerValue <= 5) {
+            return "iconst_" + literal.getLiteral() + NL;
+        }
+
+        else if (integerValue >= Byte.MIN_VALUE && integerValue <= Byte.MAX_VALUE){
+            return "bpush " + literal.getLiteral() + NL;
+        }
+
+        else if(integerValue >= Short.MIN_VALUE && integerValue <= Short.MAX_VALUE){
+            return "sipush " + literal.getLiteral() + NL;
+        }
+
+        else
+            return "ldc " + literal.getLiteral() + NL;
     }
 
     private String generateOperand(Operand operand) {
@@ -379,13 +396,13 @@ public class JasminGenerator {
         Type returnType = returnInst.getReturnType();
 
         if (returnType instanceof BuiltinType) {
-            //code.append(generators.apply(returnInst.getOperand()));
+            returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
             currentStack--;
             code.append("ireturn").append(NL);
         } else if (returnType.toString().equals("VOID")) {
             code.append("return").append(NL);
         } else {
-            //code.append(generators.apply(returnInst));
+            returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
             currentStack--;
             code.append("areturn").append(NL);
         }
@@ -419,13 +436,27 @@ public class JasminGenerator {
 
     private String generateInvokeSpecial(InvokeSpecialInstruction invokeSpecial) {
         var code = new StringBuilder();
-        code.append(apply(invokeSpecial.getCaller()));
 
+        //Handle caller
+        code.append(apply(invokeSpecial.getCaller()));
+        currentStack--;
+
+        //Handle arguments
         for (Element element : invokeSpecial.getArguments()){
             code.append(apply(element));
         }
+        currentStack -= invokeSpecial.getArguments().size();
 
-        code.append("InvokeSpecial").append(NL);
+        //
+        String returnType = getJasminType(invokeSpecial.getReturnType());
+        if (!returnType.equals("void"))
+            currentStack++;
+
+        String className = currentMethod.getOllirClass().getClassName();
+        code.append("invokenonvirtual").append(SPACE).append(className).append("/<init>").
+                append("(").append(")").
+                append(returnType).append(NL);
+
         return code.toString();
     }
 
