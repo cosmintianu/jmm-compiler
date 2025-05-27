@@ -78,7 +78,7 @@ public class Method extends AnalysisVisitor {
 
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
 
-        currentMethodName = method.get("nameMethod");
+        currentMethodName = method.get("methodName");
 
 //        System.out.println("The method: " + currentMethodName);
 

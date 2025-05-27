@@ -9,27 +9,23 @@ grammar Javamm;
    ############################################### */
 CLASS : 'class' ;
 INT : 'int' ;
+BOOLEAN : 'boolean' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 EXTENDS : 'extends';
-
 STATIC : 'static';
 VOID :'void';
-MAIN : 'main';
 IF: 'if';
 ELSE: 'else';
 WHILE: 'while';
 NEW : 'new';
-LENGTH : 'length';
-TRUE: 'true';
-FALSE: 'false';
 THIS: 'this';
 IMPORT: 'import';
+TRUE: 'true';
+FALSE: 'false';
 
 INTEGER : [1-9][0-9]*|[0];
-BOOLEAN : 'boolean' ;
-STRING: 'String';
-ID : [a-zA-Z_][a-zA-Z0-9_]* ;
+ID : [a-zA-Z_$][a-zA-Z0-9_$]*;
 
 WS : [ \t\n\r\f]+ -> skip ;
 LINE_COMMENT: '//' ~[\r\n]+ -> skip;
@@ -63,23 +59,28 @@ varDecl
 type locals[ boolean isArray= false, boolean isVarargs= false]
     : name= INT ('[' ']' {$isArray = true;})? #IntType
     | name= INT '...' {$isVarargs = true; $isArray = true;} #VarargsType
-    | name= BOOLEAN   #BooleanType
-    | name= ID    #ClassType
-    | name = STRING  ('[' ']' {$isArray = true;})? #StringType
+    | name= BOOLEAN ('[' ']' {$isArray = true;})? #BooleanType // Added array option for consistency
+    | name= ID ('[' ']' {$isArray = true;})?   #ClassType
     ;
 
 methodDecl locals[boolean isMain=false, boolean isPublic=false, boolean isStatic=false]
-    : (PUBLIC {$isPublic=true;})?
-        (STATIC {$isStatic=true;})?
-        type nameMethod=ID
-            '(' (param (',' param)*)? ')'
-        '{' varDecl* stmt* '}'
-
-    | {$isMain=true;}
-        (PUBLIC {$isPublic=true;})?
-        (STATIC {$isStatic=true;})
-         VOID nameMethod=MAIN '(' param ')'
-        '{' varDecl * stmt* '}'
+    : // General methods
+      (PUBLIC {$isPublic=true;})?
+      (STATIC {$isStatic=true;})?
+      type methodName=ID
+      '(' (param (',' param)*)? ')'
+      '{'
+          varDecl* stmt*
+      '}'
+    |
+      {$isMain=true;}
+      (PUBLIC {$isPublic=true;})?
+      (STATIC {$isStatic=true;}) // STATIC is mandatory for this form
+      VOID methodName=ID // 'methodName' will be an ID token
+      '('  param ')'
+      '{'
+          varDecl* stmt* // Allowing empty body
+      '}'
     ;
 
 param
@@ -103,7 +104,6 @@ expr
     | '[' ( expr ( ',' expr )* )? ']' #ArrayLiteral
     | NEW INT '[' capacity=expr ']' #NewArrayExpr
     | NEW name=ID '(' ')' #NewObjectExpr
-    | expr '.' LENGTH #LengthExpr
     | expr '.' name=ID '(' ( expr ( ',' expr )* )? ')' #MethodCallExpr
     | expr op=( '*' | '/' ) expr #BinaryExpr
     | expr op=( '+' | '-') expr #BinaryExpr
@@ -113,6 +113,7 @@ expr
     | value=INTEGER #IntegerLiteral
     | name=TRUE #BooleanLiteral
     | name=FALSE #BooleanLiteral
+    | expr '.' ID #DotAccessExpr
     | name=ID #VarRefExpr
     | name=THIS #ThisExpr
     ;

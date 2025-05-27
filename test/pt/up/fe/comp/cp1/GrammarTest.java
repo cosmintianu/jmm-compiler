@@ -252,10 +252,11 @@ public class GrammarTest {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
     }
 
+    // TODO This is syntax is correct should be moved to semantic analysis
     //New test! Should not accept unexpected structure
-    @Test (expected = RuntimeException.class)
-    public void testMainMethodStructure() {
-        TestUtils.parseVerbose("static void main(Avestruz[] args) {}", MAIN_METHOD);
-    }
+//    @Test (expected = RuntimeException.class)
+//    public void testMainMethodStructure() {
+//        TestUtils.parseVerbose("static void main(Avestruz[] args) {}", MAIN_METHOD);
+//    }
 
 }

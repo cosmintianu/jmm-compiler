@@ -81,7 +81,7 @@ public class JmmSymbolTableBuilder {
         Map<String, Type> map = new HashMap<>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("nameMethod");
+            var name = method.get("methodName");
             boolean isMain = method.getBoolean("isMain", false);
 
             if (isMain) {
@@ -103,7 +103,7 @@ public class JmmSymbolTableBuilder {
         Map<String, List<Symbol>> map = new HashMap<>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("nameMethod");
+            var name = method.get("methodName");
             var params = method.getChildren(Kind.PARAM).stream()
                     .map(param -> {
                         var typeNode = param.getChildren().get(0);
@@ -122,7 +122,7 @@ public class JmmSymbolTableBuilder {
         var map = new HashMap<String, List<Symbol>>();
 
         for (var method : classDecl.getChildren(Kind.METHOD_DECL)) {
-            var name = method.get("nameMethod");
+            var name = method.get("methodName");
             var locals = method.getChildren(Kind.VAR_DECL).stream()
                     .map(varDecl -> {
                         var typeNode = varDecl.getChildren().get(0);
@@ -139,7 +139,7 @@ public class JmmSymbolTableBuilder {
 
     private List<String> buildMethods(JmmNode classDecl) {
         return classDecl.getChildren(Kind.METHOD_DECL).stream()
-                .map(method -> method.get("nameMethod"))
+                .map(method -> method.get("methodName"))
                 .toList();
     }
 }

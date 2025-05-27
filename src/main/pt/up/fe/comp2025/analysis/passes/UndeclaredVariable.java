@@ -31,13 +31,17 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("nameMethod");
+        currentMethod = method.get("methodName");
 
         return null;
     }
 
     private Void visitClassType(JmmNode classType, SymbolTable table) {
         var className = classType.get("name");
+
+        if (className.equals("String")) {
+            return null;
+        }
 
         // Check if the object has the same class as the current one
         if (currentClass.equals(className)) {

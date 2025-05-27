@@ -84,7 +84,7 @@ public class TypeUtils {
         //case parent is returnType e child is import
         else if (parent.getKind().equals("ReturnStmt") && table.getImports().contains(varRefType.getName())) {
 
-            var currentMethod = methodExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+            var currentMethod = methodExpr.getAncestor(Kind.METHOD_DECL).get().get("methodName");
             var returnType = table.getReturnType(currentMethod);
             return returnType;
         }
@@ -92,8 +92,7 @@ public class TypeUtils {
         else if (parent.getKind().equals("VarAssignStmt")) {
             var left_side = parent.getChild(0);
             return getExprType(left_side);
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -114,8 +113,16 @@ public class TypeUtils {
             return null;
         }
 
-        String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("nameMethod");
+        String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("methodName");
         String varName = varRefExpr.get("name");
+
+        // So we return the local variable, not the class field
+        for (Symbol localVar : table.getLocalVariables(methodName)) {
+            if (localVar.getName().equals(varName)) {
+                return localVar.getType();
+
+            }
+        }
 
         for (Symbol field : table.getFields()) {
             if (field.getName().equals(varName)) {
@@ -126,13 +133,6 @@ public class TypeUtils {
         for (Symbol param : table.getParameters(methodName)) {
             if (param.getName().equals(varName)) {
                 return param.getType();
-            }
-        }
-
-        for (Symbol localVar : table.getLocalVariables(methodName)) {
-            if (localVar.getName().equals(varName)) {
-                return localVar.getType();
-
             }
         }
 

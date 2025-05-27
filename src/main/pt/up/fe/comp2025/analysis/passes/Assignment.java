@@ -21,7 +21,7 @@ public class Assignment extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode methodDecl, SymbolTable table) {
-        currentMethod = methodDecl.get("nameMethod");
+        currentMethod = methodDecl.get("methodName");
         return null;
     }
 
