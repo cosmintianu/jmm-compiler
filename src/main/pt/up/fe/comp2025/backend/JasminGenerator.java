@@ -120,20 +120,10 @@ public class JasminGenerator {
         return operand_type;
     }
 
-    private String getType(Type type) {
+    private String spaceOr_ (int regNumber) {
 
-        String operand_type = "";
-
-        if (type instanceof ArrayType arrayType) {
-            operand_type = "..";
-        }
-        else if (type instanceof ClassType classType) {
-            switch (classType.getKind()){
-                case CLASS, OBJECTREF -> operand_type = currentMethod.getClass().getName().toLowerCase();
-            }
-        }
-
-        return operand_type;
+        if (regNumber < 4) return "_" + regNumber;
+        else return " " + regNumber;
     }
 
     private String generateClassUnit(ClassUnit classUnit) {
@@ -218,9 +208,7 @@ public class JasminGenerator {
         }
 
         //Define Return Jasmin Type
-        var returnType = "I";
-        //TODO: get return using this function is the correct way I think
-        // var returnType = generateReturn();
+        var returnType = getJasminType(method.getReturnType());
 
         code.append("\n.method ").append(modifier)
                 .append(methodName)
@@ -242,7 +230,7 @@ public class JasminGenerator {
         int local = locals.size();
 
         // Add limits
-        code.append(TAB).append(".limit stack ").append(Math.max(0, currentStack)).append(NL);
+        code.append(TAB).append(".limit stack ").append(Math.min(99, currentStack)).append(NL);
         code.append(TAB).append(".limit locals ").append(local).append(NL);
 
         code.append(instructions).append(".end method\n");
@@ -271,10 +259,10 @@ public class JasminGenerator {
             var regType = regName.getVarType();
 
             if (regType instanceof BuiltinType) {
-                code.append("istore_").append(reg).append(NL);
+                code.append("istore").append(spaceOr_(reg)).append(NL);
             }
             else {
-                code.append("astore_").append(reg).append(NL);
+                code.append("astore").append(spaceOr_(reg)).append(NL);
             }
             currentStack--;
         }
@@ -302,8 +290,6 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName());
 
-
-        // TODO: Hardcoded for int type, needs to be expanded
         String store = getStoreType(operand);
         code.append(store).append(NL);
 
@@ -319,11 +305,29 @@ public class JasminGenerator {
     }
 
     private String generateOperand(Operand operand) {
+
+        var code = new StringBuilder();
+
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName());
+        var regNumber = reg.getVirtualReg();
 
-        // TODO: Hardcoded for int type, needs to be expanded
-        return "iload " + reg.getVirtualReg() + NL;
+        if (operand.getType() instanceof ArrayType) {
+            code.append("aload").append(spaceOr_(regNumber)).append(NL);
+
+            //TODO: handling index
+        }
+
+        else if (operand.getType() instanceof BuiltinType) {
+            code.append("iload").append(spaceOr_(regNumber)).append(NL);
+        }
+
+        else if (operand.getType() instanceof  ClassType){
+            code.append("aload").append(spaceOr_(regNumber)).append(NL);
+        }
+
+        currentStack++;
+        return code.toString();
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -372,20 +376,18 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        String returnType = returnInst.getReturnType().toString();
+        Type returnType = returnInst.getReturnType();
 
-        switch (returnType) {
-            case "INT32", "BOOLEAN" -> {
-                //code.append(generators.apply(returnInst.getOperand()));
-                currentStack--;
-                code.append("ireturn").append(NL);
-            }
-//            case "OBJECTREF", "ARRAYREF", "STRING", "THIS", -> {
-//                code.append(generators.apply(returnInst.getOperand()));
-//                currentStack--;
-//                code.append("areturn").append(NL);
-//            }
-            case "VOID" -> code.append("return").append(NL);
+        if (returnType instanceof BuiltinType) {
+            //code.append(generators.apply(returnInst.getOperand()));
+            currentStack--;
+            code.append("ireturn").append(NL);
+        } else if (returnType.toString().equals("VOID")) {
+            code.append("return").append(NL);
+        } else {
+            //code.append(generators.apply(returnInst));
+            currentStack--;
+            code.append("areturn").append(NL);
         }
 
         return code.toString();
@@ -417,6 +419,11 @@ public class JasminGenerator {
 
     private String generateInvokeSpecial(InvokeSpecialInstruction invokeSpecial) {
         var code = new StringBuilder();
+        code.append(apply(invokeSpecial.getCaller()));
+
+        for (Element element : invokeSpecial.getArguments()){
+            code.append(apply(element));
+        }
 
         code.append("InvokeSpecial").append(NL);
         return code.toString();
