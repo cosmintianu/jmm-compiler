@@ -35,7 +35,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new Assignment(),
                 new IfStatementPass(),
                 new WhileStatement(),
-                new VariableDeclaration());
+                new VariableDeclaration(),
+                new ImportPass(),
+                new ParamPass()
+        );
     }
 
     @Override

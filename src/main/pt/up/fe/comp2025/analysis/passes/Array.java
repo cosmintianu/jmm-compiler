@@ -21,7 +21,7 @@ public class Array extends AnalysisVisitor {
         addVisit(Kind.ARRAY_ASSIGN_STMT, this::visitArrayAssign);
     }
 
-    private Void visitArrayAssign (JmmNode node, SymbolTable symbolTable){
+    private Void visitArrayAssign(JmmNode node, SymbolTable symbolTable) {
 
         //Check capacity
         var array_name = node.get("name");
@@ -30,14 +30,14 @@ public class Array extends AnalysisVisitor {
             return null;
         }
 
-        if (actualCapacity == 0){
+        if (actualCapacity == 0) {
             addNewErrorReport(node, "Array cannot have defined capacity of zero");
         }
 
         var index_node = node.getChild(0);
         var indexAccessed = 0;
 
-        if (index_node.getKind().equals("IntegerLiteral")){
+        if (index_node.getKind().equals("IntegerLiteral")) {
             indexAccessed = Integer.valueOf(node.getChild(0).get("value"));
         } else if (index_node.getKind().equals("VarRefExpr")) {
             //TODO: handle this situation
@@ -85,7 +85,7 @@ public class Array extends AnalysisVisitor {
             var message = String.format("Cannot access array/varargs through variable '%s' which is not an int.", child_1.get("name"));
             addNewErrorReport(child_1, message);
         } else if ((!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
-            System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
+//            System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
             var message = String.format("Cannot index variable '%s' because it is not an array or varargs.", child_0.get("name"));
             addNewErrorReport(child_0, message);
         }

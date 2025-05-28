@@ -1,0 +1,7 @@
+class Test {
+    int a;
+    boolean a;
+    public static int countEvenNumbers(int n) {
+
+    }
+}

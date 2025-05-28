@@ -1,6 +1,5 @@
 package pt.up.fe.comp2025.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -8,10 +7,8 @@ import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.ast.Kind;
 import pt.up.fe.comp2025.ast.TypeUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 public class Method extends AnalysisVisitor {
 
@@ -19,6 +16,8 @@ public class Method extends AnalysisVisitor {
     private String className;
     // Map to hold the parameters types for all methods
     private Map<String, List<Type>> methodParamsMap = new HashMap<>();
+    private Set<String> alreadyDeclaredMethods = new HashSet<>();
+    private Set<String> alreadyDeclaredClasses = new HashSet<>();
     private String currentMethodName;
 
     @Override
@@ -41,6 +40,12 @@ public class Method extends AnalysisVisitor {
 
     private Void visitClassDecl(JmmNode classDecl, SymbolTable symbolTable) {
         className = classDecl.get("name");
+
+        if (alreadyDeclaredClasses.contains(className)) {
+            addNewErrorReport(classDecl, "Class " + className + " is already declared.");
+        }
+
+        alreadyDeclaredClasses.add(className);
         return null;
     }
 
@@ -80,16 +85,18 @@ public class Method extends AnalysisVisitor {
 
         currentMethodName = method.get("methodName");
 
+        System.out.println(currentMethodName);
+        if (alreadyDeclaredMethods.contains(currentMethodName)) {
+            addNewErrorReport(method, "Method " + currentMethodName + " is already declared.");
+        }
+        alreadyDeclaredMethods.add(currentMethodName);
+
 //        System.out.println("The method: " + currentMethodName);
 
         List<JmmNode> parameters = method.getChildren(Kind.PARAM);
 
         List<Type> paramTypes = new ArrayList<>();
 
-        for (Symbol param : table.getParameters(currentMethodName)) {
-            //System.out.println("param: " + param);
-            paramTypes.add(param.getType());
-        }
 
         // Add for each method the list with their parameter types in the map
         methodParamsMap.put(currentMethodName, paramTypes);

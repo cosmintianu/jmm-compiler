@@ -1,0 +1,6 @@
+class Test {
+    public static int countEvenNumbers(int n, int n) {
+
+        return n;
+    }
+}

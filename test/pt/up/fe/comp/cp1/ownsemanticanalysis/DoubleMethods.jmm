@@ -1,0 +1,11 @@
+class Test {
+    int a;
+
+    public static int countEvenNumbers(int n) {
+
+    }
+
+    public static int countEvenNumbers(int x) {
+
+    }
+}

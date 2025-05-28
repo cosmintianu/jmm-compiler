@@ -13,6 +13,7 @@ public class VariableDeclaration extends AnalysisVisitor {
 
     private JmmNode currentMethod;
     private List<JmmNode> var_decl;
+    private Set<String> alreadyDeclaredFields = new HashSet<>();
 
 
     @Override
@@ -28,6 +29,24 @@ public class VariableDeclaration extends AnalysisVisitor {
 
     private Void visitVarDecl(JmmNode varDecl, SymbolTable table) {
 
+        // Check if the variable is already declared in the current method
+//        if (currentMethod != null)
+//            if (table.getLocalVariables(currentMethod.get("methodName")).contains(varDecl.get("name"))) {
+//                addNewErrorReport(varDecl, "Variable '" + varDecl.get("ID") + "' was already declared in the current method.");
+//            }
+
+//        System.out.println(table.getFields());
+
+        // Check if the variable is already declared in the current class
+        String name = varDecl.get("name");
+
+        if (alreadyDeclaredFields.contains(name)) {
+            addNewErrorReport(varDecl, "Variable '" + varDecl.get("name") + "' was already declared in the current class.");
+        }
+
+        alreadyDeclaredFields.add(name);
+
+
         if (currentMethod != null) {
 
             var_decl = currentMethod.getChildren(Kind.VAR_DECL);
@@ -35,7 +54,7 @@ public class VariableDeclaration extends AnalysisVisitor {
 
             for (var element : var_decl) {
 
-                if(!duplicates.add(element.get("name"))){
+                if (!duplicates.add(element.get("name"))) {
                     addNewErrorReport(varDecl, "Variable '" + varDecl.get("name") + "' was defined multiple times.");
                 }
             }
