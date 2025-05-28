@@ -63,6 +63,7 @@ public class JasminGenerator {
         generators.put(NewInstruction.class, this::generateNewInstruction);
         generators.put(InvokeSpecialInstruction.class, this::generateInvokeSpecial);
         generators.put(Field.class, this::generateField);
+        //generators.put(PutFieldInstruction.class, this::generatePutField);
     }
 
     private String apply(TreeNode node) {
@@ -304,6 +305,8 @@ public class JasminGenerator {
 
         var integerValue = Integer.parseInt(literal.getLiteral());
 
+        currentStack++;
+
         //sipush when the constant fits in a short
         if (integerValue >= -1 && integerValue <= 5) {
             return "iconst_" + literal.getLiteral() + NL;
@@ -395,13 +398,17 @@ public class JasminGenerator {
 
         Type returnType = returnInst.getReturnType();
 
-        if (returnType instanceof BuiltinType) {
+        if (returnType.toString().equals("VOID")) {
+            code.append("return").append(NL);
+        }
+
+        else if (returnType instanceof BuiltinType) {
             returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
             currentStack--;
             code.append("ireturn").append(NL);
-        } else if (returnType.toString().equals("VOID")) {
-            code.append("return").append(NL);
-        } else {
+        }
+
+        else {
             returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
             currentStack--;
             code.append("areturn").append(NL);
@@ -473,6 +480,14 @@ public class JasminGenerator {
 
         code.append(SPACE).append("'").append(field.getFieldName()).append("'").
             append(SPACE).append(getJasminType(field.getFieldType())).append(NL);
+
+        return code.toString();
+    }
+
+    private String generatePutField(Field field) {
+        var code = new StringBuilder();
+
+        currentStack -= 2;
 
         return code.toString();
     }
