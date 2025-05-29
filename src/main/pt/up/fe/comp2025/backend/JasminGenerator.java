@@ -62,8 +62,13 @@ public class JasminGenerator {
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(NewInstruction.class, this::generateNewInstruction);
         generators.put(InvokeSpecialInstruction.class, this::generateInvokeSpecial);
+        generators.put(InvokeStaticInstruction.class, this::generateStatic);
+        generators.put(InvokeVirtualInstruction.class, this::generateVirtual);
         generators.put(Field.class, this::generateField);
-        //generators.put(PutFieldInstruction.class, this::generatePutField);
+        generators.put(PutFieldInstruction.class, this::generatePutField);
+        generators.put(GetFieldInstruction.class, this::generateGetField);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
+        generators.put(GotoInstruction.class, this::generateGoto);
     }
 
     private String apply(TreeNode node) {
@@ -288,6 +293,9 @@ public class JasminGenerator {
 
         var operand = (Operand) lhs;
 
+        if (operand instanceof ArrayOperand arrayOperand)
+            code.append(generators.apply(arrayOperand));
+
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName());
 
@@ -467,6 +475,58 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String generateStatic(InvokeStaticInstruction invokeStatic) {
+        var code = new StringBuilder();
+
+        //Handle caller
+        code.append(apply(invokeStatic.getCaller()));
+        currentStack--;
+
+        //Handle arguments
+        for (Element element : invokeStatic.getArguments()){
+            code.append(apply(element));
+        }
+        currentStack -= invokeStatic.getArguments().size();
+
+        //
+        String returnType = getJasminType(invokeStatic.getReturnType());
+        if (!returnType.equals("void"))
+            currentStack++;
+
+        String className = currentMethod.getOllirClass().getClassName();
+        code.append("invokestatic").append(SPACE).append(className).append("/<init>").
+                append("(").append(")").
+                append(returnType).append(NL);
+
+        return code.toString();
+    }
+
+    private String generateVirtual(InvokeVirtualInstruction invokeVirtual) {
+        var code = new StringBuilder();
+
+        //Handle caller
+        code.append(apply(invokeVirtual.getCaller()));
+        currentStack--;
+
+        //Handle arguments
+        for (Element element : invokeVirtual.getArguments()){
+            code.append(apply(element));
+        }
+        currentStack -= invokeVirtual.getArguments().size();
+
+        //
+        String returnType = getJasminType(invokeVirtual.getReturnType());
+        if (!returnType.equals("void"))
+            currentStack++;
+
+        String className = currentMethod.getOllirClass().getClassName();
+        code.append("invokevirtual").append(SPACE).append(className).append("/<init>").
+                append("(").append(")").
+                append(returnType).append(NL);
+
+        return code.toString();
+    }
+
     private String generateField(Field field) {
         var code = new StringBuilder();
         code.append(".field").append(SPACE);
@@ -484,13 +544,48 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String generatePutField(Field field) {
+    private String generatePutField(PutFieldInstruction putfield) {
         var code = new StringBuilder();
 
+        generators.apply(putfield.getValue());
         currentStack -= 2;
+
+        code.append("aload_0").append(NL);
+
+        String className = currentMethod.getOllirClass().getClassName();
+        String name = putfield.getField().getName();
+        String type = getJasminType(putfield.getFieldType());
+
+        code.append("putfield ").append(className).append("/").append(name).
+                append(SPACE).append(type).append(NL);
 
         return code.toString();
     }
+
+    private String generateGetField(GetFieldInstruction getField) {
+        var code = new StringBuilder();
+
+        String className = currentMethod.getOllirClass().getClassName();
+        String name = getField.getField().getName();
+        String type = getJasminType(getField.getFieldType());
+
+        code.append("aload_0").append(NL);
+        code.append("getfield ").append(className).append("/").append(name).
+                append(SPACE).append(type).append(NL);
+        return code.toString();
+    }
+
+    private String generateSingleOpCond(SingleOpCondInstruction inst) {
+        var code = new StringBuilder();
+
+        code.append("singleOpCond").append(NL);
+        return code.toString();
+    }
+
+    private String generateGoto(GotoInstruction gotoInstruction) {
+        return "goto " + gotoInstruction.getLabel() + NL;
+    }
+
 }
 
 
