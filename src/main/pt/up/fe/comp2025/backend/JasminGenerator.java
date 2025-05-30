@@ -36,6 +36,7 @@ public class JasminGenerator {
 
     Method currentMethod;
     int currentStack;
+    int maxStack;
 
     private final JasminUtils types;
 
@@ -69,6 +70,12 @@ public class JasminGenerator {
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
         generators.put(GotoInstruction.class, this::generateGoto);
+        generators.put(OpCondInstruction.class, this::generateOpCondInst);
+    }
+
+    private void updateStack(int value) {
+        currentStack += value;
+        maxStack = Math.max(maxStack, currentStack);
     }
 
     private String apply(TreeNode node) {
@@ -159,7 +166,7 @@ public class JasminGenerator {
 
         //Append fields
         for (var field : ollirResult.getOllirClass().getFields()) {
-            code.append(generators.apply(field));
+            code.append(apply(field));
         }
 
         // generate a single constructor method
@@ -195,6 +202,7 @@ public class JasminGenerator {
         // set method
         currentMethod = method;
         currentStack = 0;
+        maxStack = 0;
 
         var code = new StringBuilder();
 
@@ -236,7 +244,7 @@ public class JasminGenerator {
         int local = locals.size();
 
         // Add limits
-        code.append(TAB).append(".limit stack ").append(Math.min(99, currentStack)).append(NL);
+        code.append(TAB).append(".limit stack ").append(Math.min(99, maxStack)).append(NL);
         code.append(TAB).append(".limit locals ").append(local).append(NL);
 
         code.append(instructions).append(".end method\n");
@@ -255,7 +263,7 @@ public class JasminGenerator {
 
         if (operandType instanceof ArrayType) {
             code.append("iastore").append(NL);
-            currentStack -= 3;
+            updateStack(-3);
             return code.toString();
         }
 
@@ -270,7 +278,7 @@ public class JasminGenerator {
             else {
                 code.append("astore").append(spaceOr_(reg)).append(NL);
             }
-            currentStack--;
+            updateStack(-1);
         }
 
         return code.toString();
@@ -294,7 +302,7 @@ public class JasminGenerator {
         var operand = (Operand) lhs;
 
         if (operand instanceof ArrayOperand arrayOperand)
-            code.append(generators.apply(arrayOperand));
+            code.append(apply(arrayOperand));
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName());
@@ -313,7 +321,7 @@ public class JasminGenerator {
 
         var integerValue = Integer.parseInt(literal.getLiteral());
 
-        currentStack++;
+        updateStack(1);
 
         //sipush when the constant fits in a short
         if (integerValue >= -1 && integerValue <= 5) {
@@ -354,7 +362,7 @@ public class JasminGenerator {
             code.append("aload").append(spaceOr_(regNumber)).append(NL);
         }
 
-        currentStack++;
+        updateStack(1);
         return code.toString();
     }
 
@@ -376,13 +384,24 @@ public class JasminGenerator {
             }
         }
 
-        // TODO: Hardcoded for int type, needs to be expanded
-        var type = binaryOp.getLeftOperand().getType();
-
         var typePrefix = "i";
 
+        if (binaryOp.getLeftOperand().getType() instanceof BuiltinType builtinType) {
+
+            switch (builtinType.getKind()){
+                case INT32:
+                    typePrefix = "i";
+                    break;
+                case BOOLEAN:
+                    typePrefix = "b";
+                    break;
+            }
+        }
+
+        var binaryOpType = binaryOp.getOperation().getOpType();
+
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
+        var op = switch (binaryOpType) {
             case ADD -> "add";
             case MUL -> "mul";
             case SUB -> "sub";
@@ -395,6 +414,20 @@ public class JasminGenerator {
             case NOTB -> "not";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
+
+        if (binaryOpType == OperationType.LTH || binaryOpType == OperationType.GTH) {
+
+            String label = String.valueOf(currentMethod.getLabels().size());
+            String labelTrue = "LabelTrue" + label;
+            String labelEnd = "LabelEnd" + label;
+
+            currentMethod.addLabel(labelTrue, binaryOp);
+            currentMethod.addLabel(labelEnd, binaryOp);
+
+            code.append(SPACE).append(labelTrue).append(NL).
+                    append("iconst_0").append(NL).append("goto ").append(labelEnd).append(NL).
+                    append("iconst_1").append(NL).append(labelEnd).append(":");
+        }
 
         code.append(typePrefix + op).append(NL);
 
@@ -411,14 +444,14 @@ public class JasminGenerator {
         }
 
         else if (returnType instanceof BuiltinType) {
-            returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
-            currentStack--;
+            returnInst.getOperand().ifPresent(op -> code.append(apply(op)));
+            updateStack(-1);
             code.append("ireturn").append(NL);
         }
 
         else {
-            returnInst.getOperand().ifPresent(op -> code.append(generators.apply(op)));
-            currentStack--;
+            returnInst.getOperand().ifPresent(op -> code.append(apply(op)));
+            updateStack(-1);
             code.append("areturn").append(NL);
         }
 
@@ -443,7 +476,7 @@ public class JasminGenerator {
         else if (caller instanceof ClassType classType){
             var className = imports_map.getOrDefault(classType.getName(), classType.getName());
             code.append("new ").append(className).append(NL);
-            currentStack++;
+            updateStack(1);
         }
 
         return code.toString();
@@ -454,18 +487,18 @@ public class JasminGenerator {
 
         //Handle caller
         code.append(apply(invokeSpecial.getCaller()));
-        currentStack--;
+        updateStack(-1);
 
         //Handle arguments
         for (Element element : invokeSpecial.getArguments()){
             code.append(apply(element));
         }
-        currentStack -= invokeSpecial.getArguments().size();
+        updateStack(-invokeSpecial.getArguments().size());
 
         //
         String returnType = getJasminType(invokeSpecial.getReturnType());
         if (!returnType.equals("void"))
-            currentStack++;
+            updateStack(1);
 
         String className = currentMethod.getOllirClass().getClassName();
         code.append("invokenonvirtual").append(SPACE).append(className).append("/<init>").
@@ -480,20 +513,25 @@ public class JasminGenerator {
 
         //Handle caller
         code.append(apply(invokeStatic.getCaller()));
-        currentStack--;
 
         //Handle arguments
         for (Element element : invokeStatic.getArguments()){
             code.append(apply(element));
         }
-        currentStack -= invokeStatic.getArguments().size();
+        updateStack(-invokeStatic.getArguments().size());
 
         //
         String returnType = getJasminType(invokeStatic.getReturnType());
         if (!returnType.equals("void"))
-            currentStack++;
+            updateStack(1);
 
-        String className = currentMethod.getOllirClass().getClassName();
+        if (!(invokeStatic.getCaller() instanceof Operand)) {
+            throw new NotImplementedException(invokeStatic.getClass());
+        }
+
+        var operand = (Operand) invokeStatic.getCaller();
+        String className = imports_map.getOrDefault(operand.getName(), operand.getName());
+
         code.append("invokestatic").append(SPACE).append(className).append("/<init>").
                 append("(").append(")").
                 append(returnType).append(NL);
@@ -506,18 +544,18 @@ public class JasminGenerator {
 
         //Handle caller
         code.append(apply(invokeVirtual.getCaller()));
-        currentStack--;
+        updateStack(-1);
 
         //Handle arguments
         for (Element element : invokeVirtual.getArguments()){
             code.append(apply(element));
         }
-        currentStack -= invokeVirtual.getArguments().size();
+        updateStack(-invokeVirtual.getArguments().size());
 
         //
         String returnType = getJasminType(invokeVirtual.getReturnType());
         if (!returnType.equals("void"))
-            currentStack++;
+            updateStack(1);
 
         String className = currentMethod.getOllirClass().getClassName();
         code.append("invokevirtual").append(SPACE).append(className).append("/<init>").
@@ -535,7 +573,7 @@ public class JasminGenerator {
             case PUBLIC -> code.append("public");
             case PRIVATE -> code.append("private");
             case PROTECTED -> code.append("protected");
-            case DEFAULT -> code.append("default");
+            case DEFAULT -> code.append("public");
         }
 
         code.append(SPACE).append("'").append(field.getFieldName()).append("'").
@@ -547,14 +585,14 @@ public class JasminGenerator {
     private String generatePutField(PutFieldInstruction putfield) {
         var code = new StringBuilder();
 
-        generators.apply(putfield.getValue());
-        currentStack -= 2;
+        apply(putfield.getValue());
+        updateStack(-2);
 
         code.append("aload_0").append(NL);
 
         String className = currentMethod.getOllirClass().getClassName();
         String name = putfield.getField().getName();
-        String type = getJasminType(putfield.getFieldType());
+        String type = getJasminType(putfield.getField().getType());
 
         code.append("putfield ").append(className).append("/").append(name).
                 append(SPACE).append(type).append(NL);
@@ -578,7 +616,9 @@ public class JasminGenerator {
     private String generateSingleOpCond(SingleOpCondInstruction inst) {
         var code = new StringBuilder();
 
-        code.append("singleOpCond").append(NL);
+        apply(inst.getCondition());
+        code.append("ifne ").append(inst.getLabel()).append(NL);
+
         return code.toString();
     }
 
@@ -586,8 +626,15 @@ public class JasminGenerator {
         return "goto " + gotoInstruction.getLabel() + NL;
     }
 
-}
+    //TODO: to be implemented
+    private String generateOpCondInst(OpCondInstruction opCondInstruction) {
 
+        var code = new StringBuilder();
+        code.append("generateOpCond").append(NL);
+        return code.toString();
+    }
+
+}
 
 // ********* Binary Op - Operation Type Class *************
 
