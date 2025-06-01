@@ -1,8 +1,4 @@
-import io.A;
-
-Test extends A {
-
-    .field public abba.i32;
+Test {
 
 	.construct Test().V {
 		invokespecial(this, "<init>").V;

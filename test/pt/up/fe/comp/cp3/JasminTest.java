@@ -52,6 +52,7 @@ public class JasminTest {
 
         var result = TestUtils.backend(ollirResult);
 
+
         ProjectTestUtils.runJasmin(result, null);
     }
 
