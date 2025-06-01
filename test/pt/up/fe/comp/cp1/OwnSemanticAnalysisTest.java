@@ -299,4 +299,17 @@ public class OwnSemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    @Test
+    public void wrongVarArgs() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongVarArgs.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    @Test
+    public void wrongVarArgs2() {
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp1/ownsemanticanalysis/WrongVarArgs2.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
 }

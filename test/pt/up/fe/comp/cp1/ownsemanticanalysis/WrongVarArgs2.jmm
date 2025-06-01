@@ -1,0 +1,8 @@
+class Test {
+    int... a;
+
+    public static int countEvenNumbers(int... n) {
+        int x;
+
+    }
+}

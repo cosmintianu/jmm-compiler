@@ -29,14 +29,11 @@ public class VariableDeclaration extends AnalysisVisitor {
 
     private Void visitVarDecl(JmmNode varDecl, SymbolTable table) {
 
-        // Check if the variable is already declared in the current method
-//        if (currentMethod != null)
-//            if (table.getLocalVariables(currentMethod.get("methodName")).contains(varDecl.get("name"))) {
-//                addNewErrorReport(varDecl, "Variable '" + varDecl.get("ID") + "' was already declared in the current method.");
-//            }
-
-//        System.out.println(table.getFields());
-
+        System.out.println(varDecl);
+        var varDeclType = varDecl.getChild(0);
+        if (varDeclType.get("isVarargs").equals("true")) {
+            addNewErrorReport(varDecl, "Cannot declare Varargs outside of method declaration");
+        }
         // Check if the variable is already declared in the current class
         String name = varDecl.get("name");
 

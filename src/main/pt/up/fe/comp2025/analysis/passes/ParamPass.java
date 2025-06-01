@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class ParamPass extends AnalysisVisitor {
     Set<String> alreadyDeclaredParams = new HashSet<>();
+    boolean hasVarArgs = false;
 
     @Override
     protected void buildVisitor() {

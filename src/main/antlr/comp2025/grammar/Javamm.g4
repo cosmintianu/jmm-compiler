@@ -61,6 +61,8 @@ type locals[ boolean isArray= false, boolean isVarargs= false]
     | name= INT '...' {$isVarargs = true; $isArray = true;} #VarargsType
     | name= BOOLEAN ('[' ']' {$isArray = true;})? #BooleanType // Added array option for consistency
     | name= ID ('[' ']' {$isArray = true;})?   #ClassType
+    | name= BOOLEAN '...' {$isVarargs = true; $isArray = true;} #BooleanVarargsType // Example
+    | name= ID '...' {$isVarargs = true; $isArray = true;} #ClassVarargsType    // Example
     ;
 
 methodDecl locals[boolean isMain=false, boolean isPublic=false, boolean isStatic=false]
