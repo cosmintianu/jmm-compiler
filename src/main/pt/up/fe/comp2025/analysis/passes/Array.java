@@ -19,6 +19,45 @@ public class Array extends AnalysisVisitor {
         addVisit(Kind.ARRAY_LITERAL, this::visitArrayLiteral);
         addVisit(Kind.INDEX_ACCESS_EXPR, this::visitIndexAccessExpr);
         addVisit(Kind.ARRAY_ASSIGN_STMT, this::visitArrayAssign);
+        addVisit(Kind.VAR_ASSIGN_STMT, this::visitVarAssignStmt);
+        addVisit(Kind.NEW_ARRAY_EXPR, this::visitNewArrayExpr);
+    }
+
+    // Handle regular assignment statements that might initialize arrays
+    private Void visitVarAssignStmt(JmmNode assignStmt, SymbolTable symbolTable) {
+        System.out.println("DEBUG: Visiting var assignment statement: " + assignStmt);
+
+        if (assignStmt.getChildren().size() >= 2) {
+            JmmNode target = assignStmt.getChild(0);
+            JmmNode value = assignStmt.getChild(1);
+
+            System.out.println("DEBUG: Assignment target: " + target + ", value: " + value);
+            System.out.println("DEBUG: Value kind: " + value.getKind());
+
+            // Check if the value is an array creation expression
+            if (value.getKind().equals(Kind.NEW_ARRAY_EXPR.toString())) {
+
+                String arrayName = target.get("name");
+
+                // Look for the size in the array creation expression
+                if (value.getChildren().size() > 0) {
+                    JmmNode sizeNode = value.getChild(0);  // First child should be the size
+                    if (sizeNode.getKind().equals(Kind.INTEGER_LITERAL.toString())) {
+
+                        int arraySize = Integer.parseInt(sizeNode.get("value"));
+                        arrayCapacities.put(arrayName, arraySize);
+                        System.out.println("DEBUG: Stored array capacity: " + arrayName + " = " + arraySize);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Handle array creation expressions directly
+    private Void visitNewArrayExpr(JmmNode newArrayExpr, SymbolTable symbolTable) {
+        return null;
     }
 
     private Void visitArrayAssign(JmmNode node, SymbolTable symbolTable) {
@@ -50,7 +89,6 @@ public class Array extends AnalysisVisitor {
             return null;
         }
 
-
         return null;
     }
 
@@ -65,7 +103,7 @@ public class Array extends AnalysisVisitor {
         // Store the capacities of all initialised arrays
         arrayCapacities.put(array_name, Integer.valueOf(capacity.get("value")));
 
-//        System.out.println(arrayCapacities);
+        System.out.println("DEBUG: Array capacities: " + arrayCapacities);
 
         return null;
     }
@@ -85,14 +123,21 @@ public class Array extends AnalysisVisitor {
             var message = String.format("Cannot access array/varargs through variable '%s' which is not an int.", child_1.get("name"));
             addNewErrorReport(child_1, message);
         } else if ((!typeUtils.getExprType(child_0).isArray()) && !(typeUtils.getExprType(child_0).getBoolean("isVarargs", false))) {
-//            System.out.println(child_0.get("name") + typeUtils.getExprType(child_0).isArray());
             var message = String.format("Cannot index variable '%s' because it is not an array or varargs.", child_0.get("name"));
             addNewErrorReport(child_0, message);
         }
 
         // Checks error for out of bounds index
         if (child_1.getKind().equals(Kind.INTEGER_LITERAL.toString())) {
-            var actualCapacity = arrayCapacities.get(child_0.get("name"));
+            String arrayName = null;
+
+            // Try to get the array name
+            if (child_0.hasAttribute("name")) {
+                arrayName = child_0.get("name");
+            }
+
+            var actualCapacity = arrayCapacities.get(arrayName);
+
             if (actualCapacity == null) {
                 return null;
             }
@@ -122,8 +167,5 @@ public class Array extends AnalysisVisitor {
             }
         }
         return null;
-
     }
-
-
 }

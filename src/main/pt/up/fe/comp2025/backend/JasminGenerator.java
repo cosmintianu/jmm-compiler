@@ -429,25 +429,65 @@ public class JasminGenerator {
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
 
-        // load values on the left and on the right
-        code.append(apply(binaryOp.getLeftOperand()));
-        code.append(apply(binaryOp.getRightOperand()));
+        // Check if this is a comparison with zero that can be optimized
+        boolean isComparisonWithZero = false;
+        boolean isRightOperandZero = false;
 
-        //Optimizations request
-        boolean comparasionToZero = false;
-
-        //If left op is a comparasion and the right argument equals zero, condition is true
-        switch (binaryOp.getOperation().getOpType()) {
-            case LTH, GTH, GTE, LTE -> {
-                if (binaryOp.getRightOperand().equals("0"))
-                    comparasionToZero = true;
+        // Check if right operand is literal zero
+        if (binaryOp.getRightOperand() instanceof LiteralElement) {
+            LiteralElement literal = (LiteralElement) binaryOp.getRightOperand();
+            if ("0".equals(literal.getLiteral())) {
+                isRightOperandZero = true;
             }
         }
+
+        var binaryOpType = binaryOp.getOperation().getOpType();
+
+        // Check if this is a comparison operation that can be optimized with zero
+        if (isRightOperandZero && (binaryOpType == OperationType.LTH ||
+                binaryOpType == OperationType.GTH ||
+                binaryOpType == OperationType.GTE ||
+                binaryOpType == OperationType.LTE ||
+                binaryOpType == OperationType.EQ ||
+                binaryOpType == OperationType.NEQ)) {
+            isComparisonWithZero = true;
+        }
+
+        if (isComparisonWithZero) {
+            // Optimized path: only load left operand, use single-operand comparison
+            code.append(apply(binaryOp.getLeftOperand()));
+
+            String labelTrue = "Label" + (labelCounter++);
+            String labelEnd = "Label" + (labelCounter++);
+
+            String compareOp = switch (binaryOpType) {
+                case LTH -> "iflt";
+                case GTH -> "ifgt";
+                case GTE -> "ifge";
+                case LTE -> "ifle";
+                case EQ -> "ifeq";
+                case NEQ -> "ifne";
+                default -> throw new NotImplementedException(binaryOpType);
+            };
+
+            code.append(compareOp).append(" ").append(labelTrue).append(NL);
+            code.append("iconst_0").append(NL);
+            code.append("goto ").append(labelEnd).append(NL);
+            code.append(labelTrue).append(":").append(NL);
+            code.append("iconst_1").append(NL);
+            code.append(labelEnd).append(":").append(NL);
+
+            updateStack(0); // We loaded 1, consumed 1, pushed 1 back
+            return code.toString();
+        }
+
+        // Non-optimized path: load both operands
+        code.append(apply(binaryOp.getLeftOperand()));
+        code.append(apply(binaryOp.getRightOperand()));
 
         var typePrefix = "i";
 
         if (binaryOp.getLeftOperand().getType() instanceof BuiltinType builtinType) {
-
             switch (builtinType.getKind()){
                 case INT32:
                     typePrefix = "i";
@@ -458,27 +498,7 @@ public class JasminGenerator {
             }
         }
 
-        var binaryOpType = binaryOp.getOperation().getOpType();
-
-        // apply operation
-        var op = switch (binaryOpType) {
-            case ADD -> "add";
-            case MUL -> "mul";
-            case SUB -> "sub";
-            case DIV -> "div";
-            case LTH -> "iflt"; //if less than
-            case GTH -> "ifgt"; //if greater than
-            case GTE -> "ifge"; //if greater than or equal
-            case LTE -> "ifle"; //if less than or equal
-            case EQ -> "ifeq";  //if equal
-            case NEQ -> "ifne"; //if not equal
-            //For booleans
-            case ANDB -> "and";
-            case ORB -> "or";
-            case NOTB -> "not";
-            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-        };
-
+        // Handle comparison operations (non-optimized)
         if (binaryOpType == OperationType.LTH || binaryOpType == OperationType.GTH ||
                 binaryOpType == OperationType.GTE || binaryOpType == OperationType.LTE ||
                 binaryOpType == OperationType.EQ || binaryOpType == OperationType.NEQ) {
@@ -489,10 +509,10 @@ public class JasminGenerator {
             String compareOp = switch (binaryOpType) {
                 case LTH -> "if_icmplt";
                 case GTH -> "if_icmpgt";
-                case GTE -> "if_icmpge";  // Add this case
-                case LTE -> "if_icmple";  // Add this case
-                case EQ -> "if_icmpeq";   // Add this case
-                case NEQ -> "if_icmpne";  // Add this case
+                case GTE -> "if_icmpge";
+                case LTE -> "if_icmple";
+                case EQ -> "if_icmpeq";
+                case NEQ -> "if_icmpne";
                 default -> throw new NotImplementedException(binaryOpType);
             };
 
@@ -506,6 +526,17 @@ public class JasminGenerator {
             updateStack(-1);
             return code.toString();
         }
+
+        // Handle arithmetic operations
+        var op = switch (binaryOpType) {
+            case ADD -> "add";
+            case MUL -> "mul";
+            case SUB -> "sub";
+            case DIV -> "div";
+            case ANDB -> "and";
+            case ORB -> "or";
+            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
+        };
 
         code.append(typePrefix + op).append(NL);
         updateStack(-1);
