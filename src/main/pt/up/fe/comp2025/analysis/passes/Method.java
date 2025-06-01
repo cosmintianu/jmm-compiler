@@ -81,11 +81,13 @@ public class Method extends AnalysisVisitor {
 
     private Void visitMethodDeclaration(JmmNode method, SymbolTable table) {
 
+        boolean isMethodMain = Boolean.parseBoolean(method.get("isMain"));
+
         isMethodStatic = Boolean.parseBoolean(method.get("isStatic"));
 
         currentMethodName = method.get("methodName");
 
-        System.out.println(currentMethodName);
+//        System.out.println(currentMethodName);
         if (alreadyDeclaredMethods.contains(currentMethodName)) {
             addNewErrorReport(method, "Method " + currentMethodName + " is already declared.");
         }
@@ -96,6 +98,50 @@ public class Method extends AnalysisVisitor {
         List<JmmNode> parameters = method.getChildren(Kind.PARAM);
 
         List<Type> paramTypes = new ArrayList<>();
+
+        if (isMethodMain) {
+            if (parameters.size() != 1) {
+                addNewErrorReport(method, // Report on method or param list
+                        "Method 'main' must have exactly one parameter of type 'String[] args', but found " +
+                                parameters.size() + " parameters.");
+            } else {
+                JmmNode mainArgNode = parameters.get(0); // The single parameter JmmNode
+
+                System.out.println(mainArgNode);
+                if (Kind.PARAM.toString().equals(mainArgNode.getKind())) {
+                    System.out.println("DA");
+                    JmmNode typeNode = mainArgNode.getChild(0);
+//                    JmmNode paramNameIdNode = mainArgNode.getChild(1);
+
+//                    System.out.println(mainArgNode.get("name"));
+//                    System.out.println(mainArgNode.get("nameType"));
+                    System.out.println(typeNode);
+
+//                    System.out.println();
+                    // Extract type information using attributes from your #ClassType (or other type rules)
+                    // Your 'type' rule: name=ID ('[' ']' {$isArray = true;})? #ClassType
+                    String actualTypeName = typeNode.get("name"); // This should be "String"
+                    boolean actualIsArray = Boolean.parseBoolean(typeNode.get("isArray")); // This should be "true"
+
+                    // Extract parameter name
+//                    String actualParamName = paramNameIdNode.get("name"); // This should be "args"
+
+                    boolean isExpectedType = "String".equals(actualTypeName) && actualIsArray;
+//                    boolean isExpectedName = "args".equals(actualParamName);
+
+                    if (!isExpectedType) {
+                        String foundParamSignature = (actualTypeName != null ? actualTypeName : "<unknown_type>") +
+                                (actualIsArray ? "[]" : "");
+                        addNewErrorReport(mainArgNode, // Report error on the parameter node itself
+                                "Parameter for method 'main' must be 'String[] args', but found: '" +
+                                        foundParamSignature + "'.");
+                    }
+                } else {
+                    // This case indicates an unexpected AST structure for the parameter of the main method.
+                    addNewErrorReport(mainArgNode, "Malformed parameter structure for method 'main'. Expected param node with type and name children.");
+                }
+            }
+        }
 
 
         // Add for each method the list with their parameter types in the map

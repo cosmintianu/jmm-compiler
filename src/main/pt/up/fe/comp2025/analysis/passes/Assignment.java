@@ -38,6 +38,10 @@ public class Assignment extends AnalysisVisitor {
         Type leftType = typeUtils.getExprType(assignStmt.getChild(0));
         Type rightType = typeUtils.getExprType(assignStmt.getChild(1));
 
+        if (typeUtils.isErrorType(leftType) || typeUtils.isErrorType(rightType)) {
+            addNewErrorReport(assignStmt, "left or right not the correct type");
+        }
+
 //        Debug
 //        System.out.println("leftType " + leftType + " & rightType " + rightType);
 

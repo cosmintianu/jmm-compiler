@@ -4,14 +4,16 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2025.analysis.AnalysisVisitor;
 import pt.up.fe.comp2025.symboltable.JmmSymbolTable;
 
 /**
  * Utility methods regarding types.
  */
 public class TypeUtils {
-
-
+    public static final Type TYPE_ERROR_METHOD = new Type("error_method", false);
+    public static final Type TYPE_ERROR_UNDECLARED_VAR = new Type("error_undeclared_var", false);
+    public static final Type TYPE_ERROR_VAR_DECLARED_OUTSIDE = new Type("error_param", false);
     private final JmmSymbolTable table;
 
     public TypeUtils(SymbolTable table) {
@@ -81,6 +83,7 @@ public class TypeUtils {
             return table.getReturnType(idName);
         }
 
+
         //case parent is returnType e child is import
         else if (parent.getKind().equals("ReturnStmt") && table.getImports().contains(varRefType.getName())) {
 
@@ -92,9 +95,8 @@ public class TypeUtils {
         else if (parent.getKind().equals("VarAssignStmt")) {
             var left_side = parent.getChild(0);
             return getExprType(left_side);
-        } else {
-            return null;
         }
+        return TYPE_ERROR_METHOD;
     }
 
 
@@ -110,7 +112,7 @@ public class TypeUtils {
     public Type getVarRefExprType(JmmNode varRefExpr) {
 
         if (varRefExpr.getAncestor(Kind.METHOD_DECL).isEmpty()) {
-            return null;
+            return TYPE_ERROR_VAR_DECLARED_OUTSIDE;
         }
 
         String methodName = varRefExpr.getAncestor(Kind.METHOD_DECL).get().get("methodName");
@@ -136,8 +138,16 @@ public class TypeUtils {
             }
         }
 
-        return null;
+        return TYPE_ERROR_UNDECLARED_VAR;
     }
 
+    public  boolean isErrorType(Type type) {
+        if (type.equals(TYPE_ERROR_VAR_DECLARED_OUTSIDE)
+                || type.equals(TYPE_ERROR_UNDECLARED_VAR)
+                || type.equals(TYPE_ERROR_METHOD)) {
+            return true;
+        }
+        return false;
+    }
 
 }
