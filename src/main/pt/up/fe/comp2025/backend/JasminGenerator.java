@@ -704,15 +704,15 @@ public class JasminGenerator {
     private String generatePutField(PutFieldInstruction putfield) {
         var code = new StringBuilder();
 
-        apply(putfield.getValue());
-        updateStack(-2);
+        updateStack(1); // due to aload_0
 
-        code.append("aload_0").append(NL);
+        code.append("aload_0").append(NL).append(apply(putfield.getValue()));
 
         String className = currentMethod.getOllirClass().getClassName();
         String name = putfield.getField().getName();
         String type = getJasminType(putfield.getField().getType());
 
+        updateStack(-2);
         code.append("putfield ").append(className).append("/").append(name).
                 append(SPACE).append(type).append(NL);
 
