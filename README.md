@@ -2,6 +2,12 @@
 
 Contains a reference implementation for the compiler project.
 
+## Work Distribution
+
+* Amanda - 40%
+* Cosmin - 30%
+* Miguel - 30%
+
 ## Compiler Optimizations
 
 This compiler includes several optimizations that improve the efficiency of the generated code at different stages of
