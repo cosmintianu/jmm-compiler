@@ -1,12 +1,13 @@
 # Compiler Project
 
-Java-- is a simplified subset of the Java programming language, crafted for educational purposes and compiler construction courses. This project guides students through all major phases of compiler development, including lexical and syntactic analysis using ANTLR and custom grammar rules, semantic analysis with symbol table construction and type checking, intermediate code generation to OLLIR (Object-Oriented Low-Level Intermediate Representation), and a range of optimizations such as constant propagation, constant folding, and register allocation. The compiler’s backend generates Jasmin assembly, which is then assembled into JVM bytecode, supporting features like class fields, methods, control flow (if, while), arrays, and varargs. The resulting bytecode runs on any standard Java Virtual Machine, making this project ideal for learning about programming language design, compiler architecture, and JVM internals
-
-## Work Distribution
-
-* Amanda - 40%
-* Cosmin - 30%
-* Miguel - 30%
+Java-- is a simplified subset of the Java programming language, crafted for educational purposes and compiler
+construction courses. This project guides students through all major phases of compiler development, including lexical
+and syntactic analysis using ANTLR and custom grammar rules, semantic analysis with symbol table construction and type
+checking, intermediate code generation to OLLIR (Object-Oriented Low-Level Intermediate Representation), and a range of
+optimizations such as constant propagation, constant folding, and register allocation. The compiler’s backend generates
+Jasmin assembly, which is then assembled into JVM bytecode, supporting features like class fields, methods, control
+flow (if, while), arrays, and varargs. The resulting bytecode runs on any standard Java Virtual Machine, making this
+project ideal for learning about programming language design, compiler architecture, and JVM internals
 
 ## Compiler Optimizations
 
